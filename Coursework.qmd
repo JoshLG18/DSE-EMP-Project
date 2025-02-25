@@ -173,17 +173,21 @@ numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
 num_cols = 4
 num_rows = int(np.ceil(len(numeric_cols) / num_cols))
 
-plt.rcParams.update({'font.size': 36})
-plt.figure(figsize=(40, 10 * num_rows))
+plt.rcParams.update({'font.size': 45})
+plt.figure(figsize=(50, 15 * num_rows))
 for i, col in enumerate(numeric_cols, 1):
     plt.subplot(num_rows, num_cols, i)
     loan_data[col].hist(bins=30, edgecolor='black')
     plt.title(f'Histogram of {col}')
     plt.xlabel(col)
     plt.ylabel('Frequency')
+    plt.xticks(rotation=45)  # Tilt the x-axis labels by 45 degrees
+
 plt.tight_layout()
-plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=36)
+plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=55)
 plt.show()
+plt.rcParams.update({'font.size': 14})
+
 ```
 
 ```{python}
