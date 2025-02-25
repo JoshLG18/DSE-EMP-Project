@@ -1,0 +1,486 @@
+---
+title: "Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis"
+author: "Student Number - 720017170"
+subtitle: BEE2041 - Data Science in Economics
+format: pdf
+toc: true
+execute:
+    echo: false
+    warning: false
+    message: false
+    results: false
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.patches as mpatches
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
+)
+from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+import statsmodels.api as sm
+from sklearn.naive_bayes import GaussianNB
+from xgboost import XGBClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
+from sklearn.model_selection import GridSearchCV
+
+
+```
+
+\newpage
+## **1. Introduction**
+## **2. Data**
+## **4. Conclusion**
+
+
+
+```{python}
+loan_data = pd.read_csv('Loan_default.csv')
+# Data Cleaning
+# Drop duplicate rows if any
+loan_data.drop_duplicates(inplace=True)
+
+# Handle missing values (if there were any) - To median values
+loan_data.dropna()
+
+#Remove LoanID
+loan_data.drop(columns=['LoanID'], inplace=True)
+
+# Turn into categorical
+loan_data['NumCreditLines'] = loan_data['NumCreditLines'].astype('category')
+loan_data['LoanTerm'] = loan_data['LoanTerm'].astype('category')
+loan_data['Default'] = loan_data['Default'].astype('category')
+
+# Calculate distribution before downsampling
+default_counts_before = loan_data['Default'].value_counts()
+
+# Balance the classes in the Default column
+default_0 = loan_data[loan_data['Default'] == 0]
+default_1 = loan_data[loan_data['Default'] == 1]
+
+# Downsample majority class
+default_0_downsampled = resample(default_0, 
+                                 replace=False,    
+                                 n_samples=len(default_1),  
+                                 random_state=123)
+
+# Combine minority class with downsampled majority class
+loan_data_balanced = pd.concat([default_0_downsampled, default_1])
+
+# Calculate distribution after downsampling
+default_counts_after = loan_data_balanced['Default'].value_counts()
+
+# Reduce the sample size to 1% of the balanced dataset while maintaining class proportions
+loan_data, _ = train_test_split(loan_data_balanced, test_size=0.90, stratify=loan_data_balanced['Default'], random_state=123)
+
+
+# Create a DataFrame for plotting
+distribution_df = pd.DataFrame({
+    'Before Downsampling': default_counts_before,
+    'After Downsampling': default_counts_after
+}).reset_index().melt(id_vars='Default', var_name='Stage', value_name='Count')
+
+distribution_df
+```
+
+
+### **2.1 Descriptive Statistics**
+```{python}
+# Compute summary statistics
+summary_stats = loan_data.describe().transpose()
+summary_stats = summary_stats[['count', 'mean', '50%', 'std', 'min', 'max']]
+summary_stats.columns = ['N', 'Mean', 'Median', 'SD', 'Min', 'Max']
+summary_stats.index.name = "Variable"
+
+# Round values for better readability and format as strings for LaTeX output
+summary_stats = summary_stats.round(1).astype(str)
+
+# Convert index to column for better formatting
+summary_stats.reset_index(inplace=True)
+
+# Convert table to LaTeX format with formatting
+latex_table = summary_stats.to_latex(index=False,
+                                     caption="Summary Statistics",
+                                     label="tab:summary_stats",
+                                     column_format="lrrrrrr",
+                                     escape=False)
+
+# Save to a LaTeX file
+with open("summary_table.tex", "w") as f:
+    f.write(latex_table)
+```
+
+\input{summary_table.tex}
+
+### **2.2 Distribution Analysis**
+
+```{python}
+numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
+num_cols = 4
+num_rows = int(np.ceil(len(numeric_cols) / num_cols))
+
+plt.rcParams.update({'font.size': 36})
+plt.figure(figsize=(40, 10 * num_rows))
+for i, col in enumerate(numeric_cols, 1):
+    plt.subplot(num_rows, num_cols, i)
+    loan_data[col].hist(bins=30, edgecolor='black')
+    plt.title(f'Histogram of {col}')
+    plt.xlabel(col)
+    plt.ylabel('Frequency')
+plt.tight_layout()
+plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=36)
+plt.show()
+```
+
+```{python}
+#Clearning pt 2
+# Convert string variables using Label Encoding into categorical
+categorical_cols = ['Education', 'EmploymentType', 'MaritalStatus', 'HasMortgage', 'HasDependents', 'LoanPurpose', 'HasCoSigner']
+label_encoders = {}
+for col in categorical_cols:
+    le = LabelEncoder()
+    loan_data[col] = le.fit_transform(loan_data[col])
+    label_encoders[col] = le
+numeric_cols = ['Age', 'Income', 'LoanAmount', 'CreditScore', 'MonthsEmployed', 'NumCreditLines', 'InterestRate', 'LoanTerm', 'DTIRatio']
+
+```
+
+```{python}
+loan_data['NumCreditLines'] = loan_data['NumCreditLines'].astype(int)
+loan_data['LoanTerm'] = loan_data['LoanTerm'].astype(int)
+
+# Box plots for all numeric variables pre normalisation
+plt.rcParams.update({'font.size': 12})
+plt.figure(figsize=(12, 5))
+loan_data.boxplot()
+plt.figtext(0.5, -0.2, "Figure ?: Box Plots of All Variables Before Normalisation", ha="center", fontsize=11)
+plt.xticks(rotation=45)
+plt.show()
+```
+
+```{python}
+#Normalisation using z-score normalisation
+numeric_cols = ['Age', 'Income', 'LoanAmount', 'CreditScore', 'MonthsEmployed', 'NumCreditLines', 'InterestRate', 'LoanTerm', 'DTIRatio']
+scaler = StandardScaler()
+loan_data[numeric_cols] = scaler.fit_transform(loan_data[numeric_cols])
+
+# Box plots for all numeric variables post normalisation
+plt.figure(figsize=(12,5))
+loan_data.boxplot()
+plt.figtext(0.5, -0.2, "Figure ?: Box Plots of All Variables After Normalisation", ha="center", fontsize=11)
+plt.xticks(rotation=45)
+plt.show()
+```
+
+
+```{python}
+# Plot the stacked bar plot
+plt.figure(figsize=(10, 6))
+sns.barplot(x='Stage', y='Count', hue='Default', data=distribution_df, palette='gray')
+plt.xlabel('Stage')
+plt.ylabel('Count')
+plt.figtext(0.5, -0.01, "Figure ?: Distribution of Default Before and After Downsampling", ha="center", fontsize=11)
+plt.legend(title='Default', loc='upper right')
+plt.show()
+```
+
+### **2.3 Correlation Analysis**
+
+```{python}
+# Correlation plot
+plt.figure(figsize=(12, 10))
+sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+plt.figtext(0.5, -0.09, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=11)
+plt.show()
+```
+
+```{python}
+# Feature Selection
+
+# Compute the correlation matrix
+corr_matrix = loan_data.corr(method='spearman')
+
+# Filter columns based on correlation with 'Default'
+target_corr = corr_matrix['Default']
+filtered_cols = target_corr[(target_corr >= 0.05) | (target_corr <= -0.05)].index.tolist()
+
+# Update the dataset to keep only the filtered columns
+loan_data = loan_data[filtered_cols]
+```
+
+
+## **3. Results and Discussion**
+
+```{python}
+# Split the data into test and train
+train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
+```
+
+### **3.1 SVM
+
+```{python}
+# Prepare dataset
+X_train = train_data.drop(columns=['Default'])
+y_train = train_data['Default']
+X_test = test_data.drop(columns=['Default'])
+y_test = test_data['Default']
+
+# Define the parameter grid for Grid Search
+param_grid = {
+    'C': [0.1, 1, 10,100],
+    'gamma': [1, 0.1, 0.01,0.001],
+    'kernel': ['rbf']
+}
+
+# Initialize Grid Search with Cross-Validation
+grid_search = GridSearchCV(SVC(probability=True, random_state=42), param_grid, cv=5, scoring='accuracy', verbose=2, n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Get the best parameters and best score
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+# Train the best model
+best_svm_model = grid_search.best_estimator_
+best_svm_model.fit(X_train, y_train)
+
+# Make Predictions
+svm_predictions = best_svm_model.predict(X_test)
+svm_probabilities = best_svm_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
+
+# Compute Confusion Matrix
+conf_matrix = confusion_matrix(y_test, svm_predictions)
+
+# Compute Performance Metrics
+accuracySVM = round(accuracy_score(y_test, svm_predictions), 3)
+precisionSVM = round(precision_score(y_test, svm_predictions), 3)
+recallSVM = round(recall_score(y_test, svm_predictions), 3)
+f1_scoreSVM = round(f1_score(y_test, svm_predictions), 3)
+
+# Compute ROC Curve and AUC Score
+fpr, tpr, _ = roc_curve(y_test, svm_probabilities)
+auc_value_SVM = round(auc(fpr, tpr), 3)
+```
+
+```{python}
+# Plot ROC Curve
+plt.figure(figsize=(8, 5))
+plt.plot(fpr, tpr, color="blue", linewidth=2, label=f"AUC: {auc_value_SVM}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.xlabel("False Positive Rate (1 - Specificity)")
+plt.ylabel("True Positive Rate (Sensitivity)")
+plt.suptitle("Figure ?: ROC Curve for SVM Model", y = 0.0005, fontsize=11)
+plt.legend()
+plt.show()
+```
+
+```{python}
+# Convert Confusion Matrix to DataFrame for Visualization
+conf_df = pd.DataFrame(conf_matrix, index=["No Default", "Default"],
+                       columns=["No Default", "Default"])
+
+# Plot Confusion Matrix
+plt.figure(figsize=(8, 5))
+sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.suptitle("Figure ?: Confusion Matrix for SVM Model", y = 0.0005, fontsize=11)
+plt.show()
+```
+
+### **3.2 Naive Bayes
+
+```{python}
+# Define the parameter grid for Grid Search
+param_grid = {
+    'var_smoothing': np.logspace(0, -9, num=100)
+}
+
+# Initialize Grid Search with Cross-Validation for GaussianNB
+grid_search = GridSearchCV(GaussianNB(), param_grid, cv=5, scoring='accuracy', verbose=2, n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Get the best parameters and best score
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+# Train the best model
+best_nb_model = grid_search.best_estimator_
+best_nb_model.fit(X_train, y_train)
+
+# Make Predictions
+nb_predictions = best_nb_model.predict(X_test)
+nb_probabilities = best_nb_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
+
+# Compute Confusion Matrix
+conf_matrix_nb = confusion_matrix(y_test, nb_predictions)
+
+# Compute Performance Metrics
+accuracyNB = round(accuracy_score(y_test, nb_predictions), 3)
+precisionNB = round(precision_score(y_test, nb_predictions), 3)
+recallNB = round(recall_score(y_test, nb_predictions), 3)
+f1_scoreNB = round(f1_score(y_test, nb_predictions), 3)
+
+# Compute ROC Curve and AUC Score
+fpr_nb, tpr_nb, _ = roc_curve(y_test, nb_probabilities)
+auc_value_NB = round(auc(fpr_nb, tpr_nb), 3)
+```
+
+```{python}
+# Plot ROC Curve for Naive Bayes
+plt.figure(figsize=(8, 5))
+plt.plot(fpr_nb, tpr_nb, color="blue", linewidth=2, label=f"AUC: {auc_value_NB}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.xlabel("False Positive Rate (1 - Specificity)")
+plt.ylabel("True Positive Rate (Sensitivity)")
+plt.suptitle("Figure ?: ROC Curve for Naive Bayes Model", y = 0.0005, fontsize=11)
+plt.legend()
+plt.show()
+```
+
+```{python}
+# Convert Confusion Matrix to DataFrame for Visualization
+conf_df = pd.DataFrame(conf_matrix_nb, index=["No Default", "Default"],
+                       columns=["No Default", "Default"])
+
+# Plot Confusion Matrix
+plt.figure(figsize=(8, 5))
+sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.suptitle("Figure ?: Confusion Matrix for NB Model", y = 0.0005, fontsize=11)
+plt.show()
+```
+
+### **3.3 XGBoost
+
+```{python}
+# Define the parameter grid for Grid Search
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [3, 5, 7],
+    'learning_rate': [0.01, 0.1, 0.2],
+    'subsample': [0.8, 0.9, 1.0]
+}
+
+# Initialize Grid Search with Cross-Validation for XGBClassifier
+grid_search = GridSearchCV(XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42), param_grid, cv=5, scoring='accuracy', verbose=2, n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Get the best parameters and best score
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+# Train the best model
+best_xgb_model = grid_search.best_estimator_
+best_xgb_model.fit(X_train, y_train)
+
+# Make Predictions
+xgb_predictions = best_xgb_model.predict(X_test)
+xgb_probabilities = best_xgb_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
+
+# Compute Confusion Matrix
+conf_matrix_xgb = confusion_matrix(y_test, xgb_predictions)
+
+# Compute Performance Metrics
+accuracyXGB = round(accuracy_score(y_test, xgb_predictions), 3)
+precisionXGB = round(precision_score(y_test, xgb_predictions), 3)
+recallXGB = round(recall_score(y_test, xgb_predictions), 3)
+f1_scoreXGB = round(f1_score(y_test, xgb_predictions), 3)
+
+# Compute ROC Curve and AUC Score
+fpr_xgb, tpr_xgb, _ = roc_curve(y_test, xgb_probabilities)
+auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
+
+```
+
+
+```{python}
+# Plot ROC Curve for XGBoost
+plt.figure(figsize=(8, 5))
+plt.plot(fpr_xgb, tpr_xgb, color="blue", linewidth=2, label=f"AUC: {auc_value_XGB}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.xlabel("False Positive Rate (1 - Specificity)")
+plt.ylabel("True Positive Rate (Sensitivity)")
+plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = 0.0005, fontsize=11)
+plt.legend()
+plt.show()
+```
+
+```{python}
+# Convert Confusion Matrix to DataFrame for Visualization
+conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
+                       columns=["No Default", "Default"])
+
+# Plot Confusion Matrix
+plt.figure(figsize=(8, 5))
+sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.suptitle("Figure ?: Confusion Matrix for SVM Model", y = 0.0005, fontsize=11)
+plt.show()
+```
+
+
+### **3.4 Model Evaluation and Comparisons**
+
+```{python}
+# Create Accuracy DataFrame
+accuracy_df = pd.DataFrame({
+    "Model": ["SVM", "NB", "XGB"],
+    "Value": [accuracySVM, accuracyNB, accuracyXGB]
+})
+
+# Create Bar Plot for Accuracy
+plt.figure(figsize=(8, 3))
+sns.barplot(x="Model", y="Value", data=accuracy_df, palette="gray", edgecolor="black")
+for index, row in accuracy_df.iterrows():
+    plt.text(index, row.Value + 0.02, round(row.Value, 3), ha="center", fontsize=10)
+plt.ylim(0, 1)
+plt.xlabel("Model")
+plt.ylabel("Accuracy")
+plt.figtext(0.5, -0.1, "Figure ?: Accuracy for Each Model", ha="center", fontsize=11)
+plt.show()
+
+```
+
+```{python}
+# Create a DataFrame for Performance Metrics
+performance_df = pd.DataFrame({
+    "Model": ["SVM", "NB", "XGB"],
+    "Accuracy": [accuracySVM, accuracyNB, accuracyXGB],
+    "Precision": [precisionSVM, precisionNB, precisionXGB],
+    "Recall": [recallSVM, recallNB, recallXGB],
+    "F1_Score": [f1_scoreSVM, f1_scoreNB, f1_scoreXGB],
+    "AUC": [auc_value_SVM, auc_value_NB, auc_value_XGB]
+})
+
+# Round values for better readability and format as strings for LaTeX output
+performance_df = performance_df.round(3).astype(str)
+
+# Convert the DataFrame to LaTeX format with appropriate formatting
+performance_latex = performance_df.to_latex(index=False,
+                                             caption="Performance Metrics for Each Model",
+                                             label="tab:performance_metrics",
+                                             column_format="lrrrrrr",
+                                             escape=False)
+
+# Replace underscores with LaTeX-safe versions
+performance_latex = performance_latex.replace("F1_Score", "F1\\_Score")
+performance_latex = performance_latex.replace("AUC", "AUC")
+
+# Save to a LaTeX file
+with open("performance_table.tex", "w") as f:
+    f.write(performance_latex)
+```
+
+\input{performance_table.tex}
