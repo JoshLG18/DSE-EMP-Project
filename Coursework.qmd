@@ -41,6 +41,7 @@ from sklearn.model_selection import GridSearchCV
 \newpage
 ## **1. Introduction**
 
+
 ## **2. Data**
 
 ```{python}
@@ -247,14 +248,13 @@ plt.show()
 ```{python}
 # Correlation plot
 plt.figure(figsize=(12, 10))
-sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
 plt.figtext(0.5, -0.09, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=11)
 plt.show()
 ```
 
 ```{python}
 # Feature Selection
-
 # Compute the correlation matrix
 corr_matrix = loan_data.corr(method='spearman')
 
@@ -264,6 +264,7 @@ filtered_cols = target_corr[(target_corr >= 0.05) | (target_corr <= -0.05)].inde
 
 # Update the dataset to keep only the filtered columns
 loan_data = loan_data[filtered_cols]
+loan_data
 ```
 
 
@@ -272,16 +273,17 @@ loan_data = loan_data[filtered_cols]
 ```{python}
 # Split the data into test and train
 train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
-```
-
-### **3.1 Random Forest**
-
-```{python}
 # Prepare dataset
 X_train = train_data.drop(columns=['Default'])
 y_train = train_data['Default']
 X_test = test_data.drop(columns=['Default'])
 y_test = test_data['Default']
+```
+
+### **3.1 Random Forest**
+
+```{python}
+
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -328,8 +330,8 @@ auc_value_RF = round(auc(fpr_rf, tpr_rf), 3)
 ```{python}
 # Plot ROC Curve for Random Forest
 plt.figure(figsize=(8, 5))
-plt.plot(fpr_rf, tpr_rf, color="blue", linewidth=2, label=f"AUC: {auc_value_RF}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.plot(fpr_rf, tpr_rf, color="black", linewidth=2, label=f"AUC: {auc_value_RF}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.suptitle("Figure ?: ROC Curve for Random Forest Model", y = 0.0005, fontsize=11)
@@ -420,8 +422,8 @@ auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
 ```{python}
 # Plot ROC Curve for XGBoost
 plt.figure(figsize=(8, 5))
-plt.plot(fpr_xgb, tpr_xgb, color="blue", linewidth=2, label=f"AUC: {auc_value_XGB}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_XGB}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = 0.0005, fontsize=11)
@@ -507,8 +509,8 @@ auc_value_NB = round(auc(fpr_nb, tpr_nb), 3)
 ```{python}
 # Plot ROC Curve for Naive Bayes
 plt.figure(figsize=(8, 5))
-plt.plot(fpr_nb, tpr_nb, color="blue", linewidth=2, label=f"AUC: {auc_value_NB}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
+plt.plot(fpr_nb, tpr_nb, color="black", linewidth=2, label=f"AUC: {auc_value_NB}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.suptitle("Figure ?: ROC Curve for Naive Bayes Model", y = 0.0005, fontsize=11)
@@ -546,12 +548,12 @@ coefficients_df = pd.DataFrame({
 # Sort the DataFrame by coefficient values
 coefficients_df = coefficients_df.sort_values(by='Coefficient', ascending=False)
 
-# Plot the coefficients
+# Plot the coefficients in black and white with black outlines
 plt.figure(figsize=(10, 6))
-sns.barplot(x='Coefficient', y='Feature', data=coefficients_df, palette='viridis')
+sns.barplot(x='Coefficient', y='Feature', data=coefficients_df, palette=sns.color_palette("Greys", n_colors=len(coefficients_df)), edgecolor='black')
 plt.xlabel('Coefficient')
 plt.ylabel('Feature')
-plt.title('Coefficients from Gaussian Naive Bayes Model')
+plt.suptitle("Figure ?: Coefficients from Gaussian Naive Bayes Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
