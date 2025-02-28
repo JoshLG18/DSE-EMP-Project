@@ -20,20 +20,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.patches as mpatches
 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
 )
 from sklearn.preprocessing import label_binarize
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 import statsmodels.api as sm
-from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from sklearn.model_selection import GridSearchCV
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+
+import warnings
+warnings.filterwarnings('ignore')
+
 ```
 
 \newpage
@@ -277,22 +281,122 @@ X_test = test_data.drop(columns=['Default'])
 y_test = test_data['Default']
 ```
 
-### **3.1 Random Forest**
+### **3.1 Logistic Regression**
 
 ```{python}
-from sklearn.ensemble import RandomForestClassifier
+import sys
+import os
+sys.stdout = open(os.devnull, 'w')
 
 # Define the parameter grid for Grid Search
 param_grid = {
-    'n_estimators': [50, 100, 200],
-    'max_depth': [None, 10, 20, 30],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
+    'C': [0.01, 0.1, 1, 10, 100],
+    'penalty': ['l1', 'l2'],
+    'solver': ['liblinear']
+}
+
+
+# Initialize Grid Search with Cross-Validation for Logistic Regression
+stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+grid_search = GridSearchCV(LogisticRegression(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+# Get the best parameters and best score
+best_params = grid_search.best_params_
+best_score = grid_search.best_score_
+
+# Train the best model
+best_lr_model = grid_search.best_estimator_
+best_lr_model.fit(X_train, y_train)
+
+sys.stdout = sys.__stdout__
+
+
+# Make Predictions
+lr_predictions = best_lr_model.predict(X_test)
+lr_probabilities = best_lr_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
+
+# Compute Confusion Matrix
+conf_matrix_lr = confusion_matrix(y_test, lr_predictions)
+
+# Compute Performance Metrics
+accuracyLR = round(accuracy_score(y_test, lr_predictions), 3)
+precisionLR = round(precision_score(y_test, lr_predictions), 3)
+recallLR = round(recall_score(y_test, lr_predictions), 3)
+f1_scoreLR = round(f1_score(y_test, lr_predictions), 3)
+
+# Compute ROC Curve and AUC Score
+fpr_lr, tpr_lr, _ = roc_curve(y_test, lr_probabilities)
+auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
+```
+
+```{python}
+# Plot ROC Curve for Logistic Regression
+plt.figure(figsize=(8, 5))
+plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
+plt.xlabel("False Positive Rate (1 - Specificity)")
+plt.ylabel("True Positive Rate (Sensitivity)")
+plt.title("ROC Curve for Logistic Regression Model")
+plt.legend()
+plt.show()
+```
+
+```{python}
+# Convert Confusion Matrix to DataFrame for Visualization
+conf_df_lr = pd.DataFrame(conf_matrix_lr, index=["No Default", "Default"],
+                          columns=["No Default", "Default"])
+
+# Plot Confusion Matrix for Logistic Regression
+plt.figure(figsize=(8, 5))
+sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.title("Confusion Matrix for Logistic Regression Model")
+plt.show()
+```
+
+```{python}
+# Fit logistic regression model using statsmodels for odds ratios
+X_train_sm = sm.add_constant(X_train)  # Add constant term for intercept
+logit_model = sm.Logit(y_train, X_train_sm)
+result = logit_model.fit()
+
+# Extract odds ratios and 95% confidence intervals
+odds_ratios = np.exp(result.params)
+conf = np.exp(result.conf_int())
+conf['OR'] = odds_ratios
+conf.columns = ['2.5%', '97.5%', 'OR']
+conf = conf.sort_values(by='OR', ascending=True)
+
+
+# Plot odds ratios as a forest plot with 95% confidence intervals
+plt.figure(figsize=(10, 8))
+plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
+plt.axvline(x=1, linestyle='--', color='red')
+plt.xlabel('Odds Ratio')
+plt.ylabel('Features')
+plt.title('Odds Ratios with 95% Confidence Intervals')
+plt.show()
+```
+
+### **3.2 Random Forest**
+
+```{python}
+# Define the parameter grid for Grid Search
+param_grid = {
+    'n_estimators': [50, 100],
+    'max_depth': [10, 20],
+    'min_samples_split': [2, 5],
+    'min_samples_leaf': [2,4],
     'bootstrap': [True, False]
 }
 
+# Define Stratified K-Fold
+stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+
 # Initialize Grid Search with Cross-Validation
-grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=5, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -364,15 +468,15 @@ importance_df = pd.DataFrame({
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.title('Feature Importances from Random Forest Model')
+plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
-### **3.2 XGBoost**
+### **3.3 XGBoost**
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -383,8 +487,7 @@ param_grid = {
     'subsample': [0.8, 0.9, 1.0]
 }
 
-# Initialize Grid Search with Cross-Validation for XGBClassifier
-grid_search = GridSearchCV(XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42), param_grid, cv=5, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -436,7 +539,7 @@ plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for SVM Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
@@ -459,11 +562,11 @@ plt.figure(figsize=(10, 6))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.title('Feature Importances from XGBoost Model')
+plt.suptitle("Figure ?: eature Importances from XGBoost Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
-### **3.3 Light Gradient Boosting Machine (LGBM)**
+### **3.4 Light Gradient Boosting Machine (LGBM)**
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -476,10 +579,11 @@ param_grid = {
     'subsample': [0.8, 1.0]
 }
 
+lgbm_params = {'verbosity': -1}  # Set LightGBM verbosity to -1 (no warnings)
+
 # Initialize Grid Search with Cross-Validation for LGBMClassifier
-stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
-grid_search = GridSearchCV(LGBMClassifier(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
-grid_search.fit(X_train, y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=10, verbose=False)
+grid_search = GridSearchCV(LGBMClassifier(**lgbm_params,random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
 best_params = grid_search.best_params_
@@ -515,7 +619,7 @@ plt.plot(fpr_lgbm, tpr_lgbm, color="black", linewidth=2, label=f"AUC: {auc_value
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.title("ROC Curve for LightGBM Model")
+plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = 0.0005, fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -530,7 +634,7 @@ plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df_lgbm, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.title("Confusion Matrix for LightGBM Model")
+plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = 0.0005, fontsize=11)
 plt.show()
 
 ```
@@ -550,11 +654,11 @@ importance_df = pd.DataFrame({
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances in black and white with black outlines
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.title('Feature Importances from LightGBM Model')
+plt.suptitle("Figure ?: eature Importances from LightGBM Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
@@ -563,8 +667,8 @@ plt.show()
 ```{python}
 # Create Accuracy DataFrame
 accuracy_df = pd.DataFrame({
-    "Model": ["RF", "XGB", "LGBM"],
-    "Value": [accuracyRF, accuracyXGB, accuracyLGBM]
+    "Model": ["LR","RF", "XGB", "LGBM"],
+    "Value": [accuracyLR,accuracyRF, accuracyXGB, accuracyLGBM]
 })
 
 # Create Bar Plot for Accuracy
@@ -583,12 +687,12 @@ plt.show()
 ```{python}
 # Create a DataFrame for Performance Metrics
 performance_df = pd.DataFrame({
-    "Model": ["RF", "XGB", "LGBM"],
-    "Accuracy": [accuracyRF, accuracyXGB, accuracyLGBM],
-    "Precision": [precisionRF, precisionXGB, precisionLGBM],
-    "Recall": [recallRF, recallXGB, recallLGBM],
-    "F1_Score": [f1_scoreRF, f1_scoreXGB, f1_scoreLGBM],
-    "AUC": [auc_value_RF, auc_value_XGB, auc_value_LGBM]
+    "Model": ["LR","RF", "XGB", "LGBM"],
+    "Accuracy": [accuracyLR,accuracyRF, accuracyXGB, accuracyLGBM],
+    "Precision": [precisionLR,precisionRF, precisionXGB, precisionLGBM],
+    "Recall": [recallLR,recallRF, recallXGB, recallLGBM],
+    "F1_Score": [f1_scoreLR,f1_scoreRF, f1_scoreXGB, f1_scoreLGBM],
+    "AUC": [auc_value_LR,auc_value_RF, auc_value_XGB, auc_value_LGBM]
 })
 
 # Round values for better readability and format as strings for LaTeX output
