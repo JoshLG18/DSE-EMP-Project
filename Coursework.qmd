@@ -337,7 +337,7 @@ plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.title("ROC Curve for Logistic Regression Model")
+plt.figtext(0.5, -0.1, "Figure ?: Confusion Matrix for Logistic Regression Mod", ha="center", fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -352,7 +352,7 @@ plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.title("Confusion Matrix for Logistic Regression Model")
+plt.figtext(0.5, -0.1, "Figure ?: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=11)
 plt.show()
 ```
 
@@ -376,7 +376,7 @@ plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5
 plt.axvline(x=1, linestyle='--', color='red')
 plt.xlabel('Odds Ratio')
 plt.ylabel('Features')
-plt.title('Odds Ratios with 95% Confidence Intervals')
+plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios with 95% Confidence Intervals", ha="center", fontsize=11)
 plt.show()
 ```
 
