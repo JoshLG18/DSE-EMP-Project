@@ -128,7 +128,7 @@ variable_info_latex = variable_info.to_latex(index=False,
                                              label="Table 1:variable_info",
                                              column_format="lll",
                                              escape=False)
-variable_info_latex = variable_info_latex.replace("\\begin{table}", "\\begin{table}[H]")
+variable_info_latex = variable_info_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 
 # Save to a LaTeX file
@@ -160,7 +160,7 @@ latex_table = summary_stats.to_latex(index=False,
                                      column_format="lrrrrrr",
                                      escape=False)
 
-latex_table = latex_table.replace("\\begin{table}", "\\begin{table}[H]")
+latex_table = latex_table.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 # Save to a LaTeX file
 with open("summary_table.tex", "w") as f:
@@ -248,12 +248,45 @@ plt.show()
 ### **2.3 Correlation Analysis**
 
 ```{python}
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
 # Correlation plot
 plt.figure(figsize=(12, 10))
 sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
 plt.figtext(0.5, -0.09, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=11)
 plt.show()
+
+# VIF values
+train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
+X_train = train_data.drop(columns=['Default'])
+
+# Add a constant term for intercept
+X_train_vif = sm.add_constant(X_train)
+
+# Calculate VIF for each feature
+vif_data = pd.DataFrame()
+vif_data["Feature"] = X_train_vif.columns
+vif_data["VIF"] = [variance_inflation_factor(X_train_vif.values, i) for i in range(X_train_vif.shape[1])]
+
+# Drop the constant term from the VIF DataFrame
+vif_data = vif_data[vif_data["Feature"] != "const"]
+
+# Convert the DataFrame to LaTeX format with appropriate formatting
+vif_latex = vif_data.to_latex(index=False,
+                              caption="Variance Inflation Factor (VIF) Values",
+                              label="Table 4:vif_values",
+                              column_format="lc",
+                              escape=False)
+vif_latex = vif_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
+vif_latex = vif_latex.replace("\\end{table}", "\\end{table}")
+# Save to a LaTeX file
+with open("vif_table.tex", "w") as f:
+    f.write(vif_latex)
+
+# Display the VIF DataFrame
 ```
+
+\input{vif_table.tex}
 
 ```{python}
 # Feature Selection
@@ -311,7 +344,6 @@ best_lr_model.fit(X_train, y_train)
 
 sys.stdout = sys.__stdout__
 
-
 # Make Predictions
 lr_predictions = best_lr_model.predict(X_test)
 lr_probabilities = best_lr_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
@@ -337,7 +369,7 @@ plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.figtext(0.5, -0.1, "Figure ?: Confusion Matrix for Logistic Regression Mod", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure ?: ROC Curve for Logistic Regression Mod", ha="center", fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -359,19 +391,21 @@ plt.show()
 ```{python}
 # Fit logistic regression model using statsmodels for odds ratios
 X_train_sm = sm.add_constant(X_train)  # Add constant term for intercept
-logit_model = sm.Logit(y_train, X_train_sm)
-result = logit_model.fit()
+logit_model = sm.Logit(y_train, X_train_sm).fit()
+lr_train = best_lr_model.predict_proba(X_train)[:, 1]  # Extract probability for positive class
+
 
 # Extract odds ratios and 95% confidence intervals
-odds_ratios = np.exp(result.params)
-conf = np.exp(result.conf_int())
+odds_ratios = np.exp(logit_model.params)
+conf = np.exp(logit_model.conf_int())
 conf['OR'] = odds_ratios
 conf.columns = ['2.5%', '97.5%', 'OR']
-conf = conf.sort_values(by='OR', ascending=True)
+conf = conf.reindex((conf['OR'] - 1).abs().sort_values(ascending=True).index)
+conf = conf.drop(['const'])
 
 
 # Plot odds ratios as a forest plot with 95% confidence intervals
-plt.figure(figsize=(10, 8))
+plt.figure(figsize=(8, 5))
 plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
 plt.axvline(x=1, linestyle='--', color='red')
 plt.xlabel('Odds Ratio')
@@ -379,6 +413,7 @@ plt.ylabel('Features')
 plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios with 95% Confidence Intervals", ha="center", fontsize=11)
 plt.show()
 ```
+
 
 ### **3.2 Random Forest**
 
@@ -708,7 +743,7 @@ performance_latex = performance_df.to_latex(index=False,
 # Replace underscores with LaTeX-safe versions
 performance_latex = performance_latex.replace("F1_Score", "F1\\_Score")
 performance_latex = performance_latex.replace("AUC", "AUC")
-performance_latex = performance_latex.replace("\\begin{table}", "\\begin{table}[H]")
+performance_latex = performance_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 # Save to a LaTeX file
 with open("performance_table.tex", "w") as f:
