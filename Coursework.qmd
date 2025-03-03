@@ -662,7 +662,7 @@ plt.suptitle("Figure ?: eature Importances from LightGBM Model", y = 0.0005, fon
 plt.show()
 ```
 
-### **3.4 Model Evaluation and Comparisons**
+### **3.5 Model Evaluation and Comparisons**
 
 ```{python}
 # Create Accuracy DataFrame
