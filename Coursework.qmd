@@ -328,7 +328,6 @@ param_grid = {
     'solver': ['liblinear']
 }
 
-
 # Initialize Grid Search with Cross-Validation for Logistic Regression
 stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 grid_search = GridSearchCV(LogisticRegression(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
@@ -403,7 +402,6 @@ conf.columns = ['2.5%', '97.5%', 'OR']
 conf = conf.reindex((conf['OR'] - 1).abs().sort_values(ascending=True).index)
 conf = conf.drop(['const'])
 
-
 # Plot odds ratios as a forest plot with 95% confidence intervals
 plt.figure(figsize=(8, 5))
 plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
@@ -413,7 +411,6 @@ plt.ylabel('Features')
 plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios with 95% Confidence Intervals", ha="center", fontsize=11)
 plt.show()
 ```
-
 
 ### **3.2 Random Forest**
 
