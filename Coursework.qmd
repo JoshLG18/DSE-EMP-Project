@@ -176,8 +176,8 @@ numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
 num_cols = 4
 num_rows = int(np.ceil(len(numeric_cols) / num_cols))
 
-plt.rcParams.update({'font.size': 45})
-plt.figure(figsize=(50, 15 * num_rows))
+plt.rcParams.update({'font.size': 75})
+plt.figure(figsize=(80, 25 * num_rows))
 for i, col in enumerate(numeric_cols, 1):
     plt.subplot(num_rows, num_cols, i)
     loan_data[col].hist(bins=30, edgecolor='black')
@@ -187,7 +187,7 @@ for i, col in enumerate(numeric_cols, 1):
     plt.xticks(rotation=45)  # Tilt the x-axis labels by 45 degrees
 
 plt.tight_layout()
-plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=55)
+plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=90)
 plt.show()
 plt.rcParams.update({'font.size': 14})
 
@@ -690,7 +690,7 @@ plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: eature Importances from LightGBM Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = 0.0005, fontsize=11)
 plt.show()
 ```
 
@@ -717,14 +717,23 @@ plt.show()
 ```
 
 ```{python}
+
+from sklearn.metrics import log_loss
+
+log_loss_LR = log_loss(y_test, lr_predictions)
+log_loss_RF = log_loss(y_test, rf_predictions)
+log_loss_XGB = log_loss(y_test, xgb_predictions)
+log_loss_LGBM = log_loss(y_test, lgbm_predictions)
+
 # Create a DataFrame for Performance Metrics
 performance_df = pd.DataFrame({
     "Model": ["LR","RF", "XGB", "LGBM"],
     "Accuracy": [accuracyLR,accuracyRF, accuracyXGB, accuracyLGBM],
     "Precision": [precisionLR,precisionRF, precisionXGB, precisionLGBM],
     "Recall": [recallLR,recallRF, recallXGB, recallLGBM],
-    "F1_Score": [f1_scoreLR,f1_scoreRF, f1_scoreXGB, f1_scoreLGBM],
-    "AUC": [auc_value_LR,auc_value_RF, auc_value_XGB, auc_value_LGBM]
+    "F1 Score": [f1_scoreLR,f1_scoreRF, f1_scoreXGB, f1_scoreLGBM],
+    "AUC": [auc_value_LR,auc_value_RF, auc_value_XGB, auc_value_LGBM],
+    "Log Loss": [log_loss_LR,log_loss_RF, log_loss_XGB, log_loss_LGBM]
 })
 
 # Round values for better readability and format as strings for LaTeX output
@@ -738,7 +747,6 @@ performance_latex = performance_df.to_latex(index=False,
                                              escape=False)
 
 # Replace underscores with LaTeX-safe versions
-performance_latex = performance_latex.replace("F1_Score", "F1\\_Score")
 performance_latex = performance_latex.replace("AUC", "AUC")
 performance_latex = performance_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
