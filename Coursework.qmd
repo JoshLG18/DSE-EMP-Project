@@ -41,8 +41,16 @@ warnings.filterwarnings('ignore')
 ```
 
 \newpage
+
 ## **1. Introduction**
 
+Access to credit is a important driver of economic growth, allowing households or buisnesses to invest, expand and smooth consumption. However, credit risk remains a fundemental challenge for financial institutions, as loan defaulting can lead to substantial financial losses for both the company and for stakeholders. The ability to predict these defaults is vital for lending institutions to mitigate their risk and make more informed lending predictions. Recent advancements in machine learning (ML) have aided in the development of robust predictive models that outperform traditional credit-scoring methods (Yang, 2024)
+
+Ensemble methods such as Random Forest (RF), XGBoost, and Light Gradient Boosting Machines (LGBM), have shown significant promise in improving classification accuracy over traditional statistical methods (Yadav, 2025). These models offer enhanced predictive capacity due to their ability to capture non-linear relationships in borrower data, providing financial institutions with more reliable risk assessment (Roy, 2025)
+
+This study aims to explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression (LR), RF, XGBoost and LGBM have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve (AUC). Moreover, exploratory data analysis will be conducted to examine the distribution of important financial variables, identify correlations and allow for optimised feature selection to improve model performance.
+
+Due to the increasing reliance on alternative data sources and advanced computational methods in the financial sector, the results of this study may have significant practical implications. Improved credit risk analysis can help lenders reduce default rates, minimise losses and promote more inclusive access to credit (Ellsworth, 2025). By leveraging the latest ML methods, this project aims to contribute to the growing body of research on predictive analytics in finance and support more robust lending practices (Khoshkhoy Nilash & Esmaeilpour, 2025).
 
 ## **2. Data**
 
@@ -83,7 +91,7 @@ loan_data_balanced = pd.concat([default_0_downsampled, default_1])
 default_counts_after = loan_data_balanced['Default'].value_counts()
 
 # Reduce the sample size to 1% of the balanced dataset while maintaining class proportions
-loan_data, _ = train_test_split(loan_data_balanced, test_size=0.90, stratify=loan_data_balanced['Default'], random_state=123)
+loan_data_reduced, _ = train_test_split(loan_data_balanced, test_size=0.90, stratify=loan_data_balanced['Default'], random_state=123)
 
 
 # Create a DataFrame for plotting
@@ -138,8 +146,8 @@ with open("variable_info_table.tex", "w") as f:
 
 \input{variable_info_table.tex}
 
-
 ### **2.1 Descriptive Statistics**
+
 ```{python}
 # Compute summary statistics
 summary_stats = loan_data.describe().transpose()
@@ -172,6 +180,8 @@ with open("summary_table.tex", "w") as f:
 ### **2.2 Distribution Analysis**
 
 ```{python}
+loan_data = loan_data_reduced
+
 numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
 num_cols = 4
 num_rows = int(np.ceil(len(numeric_cols) / num_cols))
@@ -233,7 +243,6 @@ plt.xticks(rotation=45)
 plt.show()
 ```
 
-
 ```{python}
 # Plot the stacked bar plot
 plt.figure(figsize=(10, 6))
@@ -244,6 +253,8 @@ plt.figtext(0.5, -0.01, "Figure ?: Distribution of Default Before and After Down
 plt.legend(title='Default', loc='upper right')
 plt.show()
 ```
+
+Downsampled the dataset to ensure that the models didn't get affected by the magnitude of the majority class = can affect performance metrics.
 
 ### **2.3 Correlation Analysis**
 
@@ -282,16 +293,15 @@ vif_latex = vif_latex.replace("\\end{table}", "\\end{table}")
 # Save to a LaTeX file
 with open("vif_table.tex", "w") as f:
     f.write(vif_latex)
-
-# Display the VIF DataFrame
 ```
 
 \input{vif_table.tex}
 
 ```{python}
 # Feature Selection
+
 # Compute the correlation matrix
-corr_matrix = loan_data.corr(method='spearman')
+corr_matrix = loan_data.corr(method="pearson")
 
 # Filter columns based on correlation with 'Default'
 target_corr = corr_matrix['Default']
@@ -301,6 +311,7 @@ filtered_cols = target_corr[(target_corr >= 0.05) | (target_corr <= -0.05)].inde
 loan_data = loan_data[filtered_cols]
 ```
 
+Selected Features with a magnitude of correlation to class above 0.05 to remove any variables with low correlation likely to reduce predictive performance
 
 ## **3. Results and Discussion**
 
@@ -759,6 +770,4 @@ with open("performance_table.tex", "w") as f:
 
 ## **4. Conclusion**
 
-
-
-Link to Github Repository = https://github.com/JoshLG18/DSE-EMP-Project
+[Link to Github Repository = https://github.com/JoshLG18/DSE-EMP-Project](https://github.com/JoshLG18/DSE-EMP-Project)
