@@ -54,6 +54,10 @@ Due to the increasing reliance on alternative data sources and advanced computat
 
 ## **2. Data**
 
+Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 16 variables/columns and 255,347 observations.
+
+### 2.1 Preparing the Data
+
 ```{python}
 loan_data = pd.read_csv('Loan_default.csv')
 # Data Cleaning
@@ -91,8 +95,7 @@ loan_data_balanced = pd.concat([default_0_downsampled, default_1])
 default_counts_after = loan_data_balanced['Default'].value_counts()
 
 # Reduce the sample size to 1% of the balanced dataset while maintaining class proportions
-loan_data_reduced, _ = train_test_split(loan_data_balanced, test_size=0.90, stratify=loan_data_balanced['Default'], random_state=123)
-
+loan_data_reduced, _ = train_test_split(loan_data_balanced, test_size=0.75, stratify=loan_data_balanced['Default'], random_state=123)
 
 # Create a DataFrame for plotting
 distribution_df = pd.DataFrame({
@@ -254,7 +257,7 @@ plt.legend(title='Default', loc='upper right')
 plt.show()
 ```
 
-Downsampled the dataset to ensure that the models didn't get affected by the magnitude of the majority class = can affect performance metrics.
+Downsampled the dataset to ensure that the models didn't get affected by the magnitude of the majority class = can affect performance metrics. Also, reduced the size of the dataset by 75% in order to decrease the execution time to be reasonable.
 
 ### **2.3 Correlation Analysis**
 
