@@ -5,23 +5,18 @@
 \toprule
 Variable & Data Type & Definition \\
 \midrule
-Age & int64 & Age of the borrower \\
-Income & int64 & Income of the borrower \\
-LoanAmount & int64 & Loan amount requested by the borrower \\
-CreditScore & int64 & Credit score of the borrower \\
-MonthsEmployed & int64 & Number of months the borrower has been employed \\
-NumCreditLines & category & Number of credit lines the borrower has \\
-InterestRate & float64 & Interest rate of the loan \\
-LoanTerm & category & Term of the loan in months \\
-DTIRatio & float64 & Debt-to-Income ratio of the borrower \\
-Education & object & Education level of the borrower \\
-EmploymentType & object & Employment type of the borrower \\
-MaritalStatus & object & Marital status of the borrower \\
-HasMortgage & object & Whether the borrower has a mortgage \\
-HasDependents & object & Whether the borrower has dependents \\
-LoanPurpose & object & Purpose of the loan \\
-HasCoSigner & object & Whether the borrower has a co-signer \\
-Default & category & Whether the borrower defaulted on the loan \\
+person_age & int64 & Age of the borrower \\
+person_income & int64 & Income of the borrower \\
+person_home_ownership & object & Loan amount requested by the borrower \\
+person_emp_length & float64 & Credit score of the borrower \\
+loan_intent & object & Number of months the borrower has been employed \\
+loan_grade & object & Number of credit lines the borrower has \\
+loan_amnt & int64 & Interest rate of the loan \\
+loan_int_rate & float64 & Term of the loan in months \\
+loan_status & int64 & Debt-to-Income ratio of the borrower \\
+loan_percent_income & float64 & Education level of the borrower \\
+cb_person_default_on_file & object & Employment type of the borrower \\
+cb_person_cred_hist_length & int64 & Marital status of the borrower \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -33,10 +33,7 @@ from sklearn.utils import resample
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
-
-import warnings
-warnings.filterwarnings('ignore')
+from sklearn.metrics import log_loss
 
 ```
 
@@ -59,28 +56,20 @@ Prior to conducting the analysis of credit risk, we need to understand and organ
 ### 2.1 Preparing the Data
 
 ```{python}
-loan_data = pd.read_csv('Loan_default.csv')
+loan_data = pd.read_csv('credit_risk_dataset.csv')
 # Data Cleaning
 # Drop duplicate rows if any
 loan_data.drop_duplicates(inplace=True)
 
-# Handle missing values (if there were any) - To median values
-loan_data.dropna()
-
-#Remove LoanID
-loan_data.drop(columns=['LoanID'], inplace=True)
-
-# Turn into categorical
-loan_data['NumCreditLines'] = loan_data['NumCreditLines'].astype('category')
-loan_data['LoanTerm'] = loan_data['LoanTerm'].astype('category')
-loan_data['Default'] = loan_data['Default'].astype('category')
+# Handle missing values
+loan_data.dropna(inplace=True)
 
 # Calculate distribution before downsampling
-default_counts_before = loan_data['Default'].value_counts()
+default_counts_before = loan_data['loan_status'].value_counts()
 
 # Balance the classes in the Default column
-default_0 = loan_data[loan_data['Default'] == 0]
-default_1 = loan_data[loan_data['Default'] == 1]
+default_0 = loan_data[loan_data['loan_status'] == 0]
+default_1 = loan_data[loan_data['loan_status'] == 1]
 
 # Downsample majority class
 default_0_downsampled = resample(default_0, 
@@ -92,17 +81,16 @@ default_0_downsampled = resample(default_0,
 loan_data_balanced = pd.concat([default_0_downsampled, default_1])
 
 # Calculate distribution after downsampling
-default_counts_after = loan_data_balanced['Default'].value_counts()
+default_counts_after = loan_data_balanced['loan_status'].value_counts()
 
 # Reduce the sample size to 1% of the balanced dataset while maintaining class proportions
-loan_data_reduced, _ = train_test_split(loan_data_balanced, test_size=0.75, stratify=loan_data_balanced['Default'], random_state=123)
+loan_data_reduced, _ = train_test_split(loan_data_balanced, test_size=0.75, stratify=loan_data_balanced['loan_status'], random_state=123)
 
 # Create a DataFrame for plotting
 distribution_df = pd.DataFrame({
     'Before Downsampling': default_counts_before,
     'After Downsampling': default_counts_after
-}).reset_index().melt(id_vars='Default', var_name='Stage', value_name='Count')
-
+}).reset_index().melt(id_vars='loan_status', var_name='Stage', value_name='Count')
 ```
 
 ```{python}
@@ -125,12 +113,7 @@ variable_info['Definition'] = [
     'Debt-to-Income ratio of the borrower',
     'Education level of the borrower',
     'Employment type of the borrower',
-    'Marital status of the borrower',
-    'Whether the borrower has a mortgage',
-    'Whether the borrower has dependents',
-    'Purpose of the loan',
-    'Whether the borrower has a co-signer',
-    'Whether the borrower defaulted on the loan'
+    'Marital status of the borrower'
 ]
 
 # Convert the DataFrame to LaTeX format with appropriate formatting
@@ -183,7 +166,10 @@ with open("summary_table.tex", "w") as f:
 ### **2.2 Distribution Analysis**
 
 ```{python}
+# Set Loan Status to Categorical
+
 loan_data = loan_data_reduced
+loan_data['loan_status'] = loan_data['loan_status'].astype('category')
 
 numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
 num_cols = 4
@@ -209,20 +195,15 @@ plt.rcParams.update({'font.size': 14})
 ```{python}
 #Clearning pt 2
 # Convert string variables using Label Encoding into categorical
-categorical_cols = ['Education', 'EmploymentType', 'MaritalStatus', 'HasMortgage', 'HasDependents', 'LoanPurpose', 'HasCoSigner']
+categorical_cols = ['person_home_ownership', 'loan_intent', 'loan_grade', 'cb_person_default_on_file']
 label_encoders = {}
 for col in categorical_cols:
     le = LabelEncoder()
     loan_data[col] = le.fit_transform(loan_data[col])
     label_encoders[col] = le
-numeric_cols = ['Age', 'Income', 'LoanAmount', 'CreditScore', 'MonthsEmployed', 'NumCreditLines', 'InterestRate', 'LoanTerm', 'DTIRatio']
-
 ```
 
 ```{python}
-loan_data['NumCreditLines'] = loan_data['NumCreditLines'].astype(int)
-loan_data['LoanTerm'] = loan_data['LoanTerm'].astype(int)
-
 # Box plots for all numeric variables pre normalisation
 plt.rcParams.update({'font.size': 12})
 plt.figure(figsize=(12, 5))
@@ -234,7 +215,7 @@ plt.show()
 
 ```{python}
 #Normalisation using z-score normalisation
-numeric_cols = ['Age', 'Income', 'LoanAmount', 'CreditScore', 'MonthsEmployed', 'NumCreditLines', 'InterestRate', 'LoanTerm', 'DTIRatio']
+numeric_cols = ['person_age', 'person_income', 'person_emp_length', 'loan_amnt', 'loan_int_rate', 'loan_percent_income', 'cb_person_cred_hist_length', 'person_home_ownership', 'loan_intent', 'loan_grade', 'cb_person_default_on_file']
 scaler = StandardScaler()
 loan_data[numeric_cols] = scaler.fit_transform(loan_data[numeric_cols])
 
@@ -249,7 +230,7 @@ plt.show()
 ```{python}
 # Plot the stacked bar plot
 plt.figure(figsize=(10, 6))
-sns.barplot(x='Stage', y='Count', hue='Default', data=distribution_df, palette='gray')
+sns.barplot(x='Stage', y='Count', hue='loan_status', data=distribution_df, palette='gray')
 plt.xlabel('Stage')
 plt.ylabel('Count')
 plt.figtext(0.5, -0.01, "Figure ?: Distribution of Default Before and After Downsampling", ha="center", fontsize=11)
@@ -272,7 +253,7 @@ plt.show()
 
 # VIF values
 train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
-X_train = train_data.drop(columns=['Default'])
+X_train = train_data.drop(columns=['loan_status'])
 
 # Add a constant term for intercept
 X_train_vif = sm.add_constant(X_train)
@@ -300,20 +281,6 @@ with open("vif_table.tex", "w") as f:
 
 \input{vif_table.tex}
 
-```{python}
-# Feature Selection
-
-# Compute the correlation matrix
-corr_matrix = loan_data.corr(method="pearson")
-
-# Filter columns based on correlation with 'Default'
-target_corr = corr_matrix['Default']
-filtered_cols = target_corr[(target_corr >= 0.05) | (target_corr <= -0.05)].index.tolist()
-
-# Update the dataset to keep only the filtered columns
-loan_data = loan_data[filtered_cols]
-```
-
 Selected Features with a magnitude of correlation to class above 0.05 to remove any variables with low correlation likely to reduce predictive performance
 
 ## **3. Results and Discussion**
@@ -322,10 +289,10 @@ Selected Features with a magnitude of correlation to class above 0.05 to remove 
 # Split the data into test and train
 train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
 # Prepare dataset
-X_train = train_data.drop(columns=['Default'])
-y_train = train_data['Default']
-X_test = test_data.drop(columns=['Default'])
-y_test = test_data['Default']
+X_train = train_data.drop(columns=['loan_status'])
+y_train = train_data['loan_status']
+X_test = test_data.drop(columns=['loan_status'])
+y_test = test_data['loan_status']
 ```
 
 ### **3.1 Logistic Regression**
@@ -612,10 +579,12 @@ plt.suptitle("Figure ?: eature Importances from XGBoost Model", y = 0.0005, font
 plt.show()
 ```
 
-### **3.4 Light Gradient Boosting Machine (LGBM)**
+### **3.4  Light Gradient Boosted Machine**
 
 ```{python}
-# Define the parameter grid for Grid Search
+from lightgbm import LGBMClassifier
+
+# Build the neural network model
 # Define the parameter grid for Grid Search
 param_grid = {
     'n_estimators': [50, 100],
@@ -730,9 +699,9 @@ plt.show()
 
 ```
 
+
 ```{python}
 
-from sklearn.metrics import log_loss
 
 log_loss_LR = log_loss(y_test, lr_predictions)
 log_loss_RF = log_loss(y_test, rf_predictions)
