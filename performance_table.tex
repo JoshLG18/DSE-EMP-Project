@@ -1,14 +1,14 @@
 \begin{table}[H]\centering
 \caption{Performance Metrics for Each Model}
 \label{Table 3 :performance_metrics}
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-Model & Accuracy & Precision & Recall & F1 Score & AUC & Log Loss \\
+Model & Accuracy & Precision & Recall & F1 Score & AUC & Log Loss & Brier Score \\
 \midrule
-LR & 0.767 & 0.754 & 0.774 & 0.764 & 0.84 & 8.385 \\
-RF & 0.843 & 0.87 & 0.797 & 0.832 & 0.907 & 5.648 \\
-XGB & 0.859 & 0.899 & 0.801 & 0.847 & 0.918 & 5.066 \\
-LGBM & 0.847 & 0.899 & 0.771 & 0.83 & 0.92 & 5.532 \\
+LR & 0.758 & 0.745 & 0.776 & 0.76 & 0.832 & 8.734 & 0.242 \\
+RF & 0.851 & 0.903 & 0.783 & 0.839 & 0.924 & 5.372 & 0.149 \\
+XGB & 0.866 & 0.909 & 0.811 & 0.857 & 0.94 & 4.833 & 0.134 \\
+LGBM & 0.86 & 0.917 & 0.789 & 0.848 & 0.936 & 5.037 & 0.14 \\
 \bottomrule
 \end{tabular}
 \end{table}
