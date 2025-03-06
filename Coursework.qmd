@@ -32,11 +32,15 @@ from sklearn.utils import resample
 from sklearn.metrics import log_loss
 from sklearn.metrics import brier_score_loss
 from sklearn.metrics import precision_recall_curve, roc_curve, f1_score
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+from sklearn.linear_model import LinearRegression
+
 
 
 ```
@@ -57,9 +61,6 @@ Due to the increasing reliance on alternative data sources and advanced computat
 
 Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 28,501 observations.
 
-
-### **2.1 Preparing the Data**
-
 ```{python}
 loan_data = pd.read_csv('credit_risk_dataset.csv')
 
@@ -71,7 +72,51 @@ loan_data.columns = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'Person
 loan_data.drop_duplicates(inplace=True)
 
 # Handle missing values
-loan_data.dropna(inplace=True)
+# Calculate the number of missing values for each column
+missing_values = loan_data.isnull().sum()
+
+# Create a DataFrame for missing values
+missing_values_df = pd.DataFrame({
+    'Variable': missing_values.index,
+    'Missing Values': missing_values.values
+})
+
+# Convert the DataFrame to LaTeX format with appropriate formatting
+missing_values_latex = missing_values_df.to_latex(index=False,
+                                                  caption="Missing Values in Each Column",
+                                                  label="Table:missing_values",
+                                                  column_format="lc",
+                                                  escape=False)
+
+missing_values_latex = missing_values_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
+
+# Save to a LaTeX file
+with open("missing_values_table.tex", "w") as f:
+    f.write(missing_values_latex)
+
+
+# Replacing emplength with median due to skew
+loan_data["PersonEmpLength"].fillna(loan_data["PersonEmpLength"].median(), inplace=True)
+
+# Regression imputation for loanintrate as corr with loangrade
+
+    # Convert LoanGrade to a categorical variable
+loan_data['LoanGrade'] = loan_data['LoanGrade'].astype('category')
+
+    # Label encode the LoanGrade column
+label_encoder = LabelEncoder()
+loan_data['LoanGrade'] = label_encoder.fit_transform(loan_data['LoanGrade'])
+
+# Separate train (non-missing LoanIntRate) and test (missing LoanIntRate)
+train_data = loan_data.dropna(subset=["LoanIntRate"])
+test_data = loan_data[loan_data["LoanIntRate"].isna()]  # Data where LoanIntRate is missing
+
+# Train a Linear Regression model to predict LoanIntRate
+model = LinearRegression()
+model.fit(train_data[["LoanGrade"]], train_data["LoanIntRate"])
+
+# Predict missing LoanIntRate values using LoanGrade
+loan_data.loc[loan_data["LoanIntRate"].isna(), "LoanIntRate"] = model.predict(test_data[["LoanGrade"]])
 ```
 
 ```{python}
@@ -113,6 +158,11 @@ with open("variable_info_table.tex", "w") as f:
 
 \input{variable_info_table.tex}
 
+### **2.1 Preparing the Data**
+
+\input{missing_values_table.tex}
+
+Talk about how missing values were handled. 
 
 ### **2.2 Descriptive Statistics**
 
@@ -175,7 +225,7 @@ plt.rcParams.update({'font.size': 14})
 ```{python}
 #Clearning pt 2
 # Convert string variables using Label Encoding into categorical
-categorical_cols = ['PersonHomeOwnership', 'LoanIntent', 'LoanGrade', 'PreviousDefault']
+categorical_cols = ['PersonHomeOwnership', 'LoanIntent', 'PreviousDefault']
 label_encoders = {}
 for col in categorical_cols:
     le = LabelEncoder()
@@ -186,9 +236,9 @@ for col in categorical_cols:
 ```{python}
 # Box plots for all numeric variables pre normalisation
 plt.rcParams.update({'font.size': 12})
-plt.figure(figsize=(12, 5))
+plt.figure(figsize=(12, 4))
 loan_data.boxplot()
-plt.figtext(0.5, -0.2, "Figure ?: Box Plots of All Variables Before Normalisation", ha="center", fontsize=11)
+plt.figtext(0.5, -0.4, "Figure ?: Box Plots of All Variables Before Normalisation", ha="center", fontsize=11)
 plt.xticks(rotation=45)
 plt.show()
 ```
@@ -203,9 +253,9 @@ scaler = QuantileTransformer(output_distribution='normal')
 loan_data[numeric_cols] = scaler.fit_transform(loan_data[numeric_cols])
 
 # Box plots for all numeric variables post normalisation
-plt.figure(figsize=(12,5))
+plt.figure(figsize=(12,4))
 loan_data.boxplot()
-plt.figtext(0.5, -0.2, "Figure ?: Box Plots of All Variables After Normalisation", ha="center", fontsize=11)
+plt.figtext(0.5, -0.4, "Figure ?: Box Plots of All Variables After Normalisation", ha="center", fontsize=11)
 plt.xticks(rotation=45)
 plt.show()
 ```
@@ -241,11 +291,11 @@ loan_data = loan_data_balanced
 
 ```{python}
 # Plot the stacked bar plot
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(10, 4))
 sns.barplot(x='Stage', y='Count', hue='LoanStatus', data=distribution_df, palette='gray')
 plt.xlabel('Stage')
 plt.ylabel('Count')
-plt.figtext(0.5, -0.01, "Figure ?: Distribution of Default Before and After Downsampling", ha="center", fontsize=11)
+plt.figtext(0.5, -0.07, "Figure ?: Distribution of Default Before and After Downsampling", ha="center", fontsize=11)
 plt.legend(title='Default', loc='upper right')
 plt.show()
 ```
@@ -269,7 +319,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 # Correlation plot
 plt.figure(figsize=(12, 10))
 sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
-plt.figtext(0.5, -0.09, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=11)
+plt.figtext(0.5, -0.14, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=16)
 plt.show()
 
 # Add a constant term for intercept
@@ -354,12 +404,12 @@ auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
 
 ```{python}
 # Plot ROC Curve for Logistic Regression
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.figtext(0.5, -0.1, "Figure ?: ROC Curve for Logistic Regression Mod", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure ?: ROC Curve for Logistic Regression Model", ha="center", fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -370,7 +420,7 @@ conf_df_lr = pd.DataFrame(conf_matrix_lr, index=["No Default", "Default"],
                           columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for Logistic Regression
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
@@ -393,12 +443,12 @@ conf = conf.reindex((conf['OR'] - 1).abs().sort_values(ascending=True).index)
 conf = conf.drop(['const'])
 
 # Plot odds ratios as a forest plot with 95% confidence intervals
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
 plt.axvline(x=1, linestyle='--', color='red')
 plt.xlabel('Odds Ratio')
 plt.ylabel('Features')
-plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios with 95% Confidence Intervals", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios for Logistic Regression Model", ha = "center", fontsize=14)
 plt.show()
 ```
 
@@ -450,12 +500,12 @@ auc_value_RF = round(auc(fpr_rf, tpr_rf), 3)
 
 ```{python}
 # Plot ROC Curve for Random Forest
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 plt.plot(fpr_rf, tpr_rf, color="black", linewidth=2, label=f"AUC: {auc_value_RF}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for Random Forest Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: ROC Curve for Random Forest Model", y = -0.05, fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -466,11 +516,11 @@ conf_df_rf = pd.DataFrame(conf_matrix_rf, index=["No Default", "Default"],
                           columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for Random Forest
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.heatmap(conf_df_rf, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for Random Forest Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=11)
 plt.show()
 ```
 
@@ -490,11 +540,11 @@ importance_df = pd.DataFrame({
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
 ```
 
@@ -542,12 +592,12 @@ auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
 
 ```{python}
 # Plot ROC Curve for XGBoost
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_XGB}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = -0.05, fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -558,11 +608,11 @@ conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
                        columns=["No Default", "Default"])
 
 # Plot Confusion Matrix
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=11)
 plt.show()
 ```
 
@@ -581,11 +631,11 @@ importance_df = pd.DataFrame({
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(8, 4))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: eature Importances from XGBoost Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
 ```
 
@@ -638,12 +688,12 @@ auc_value_LGBM = round(auc(fpr_lgbm, tpr_lgbm), 3)
 ```{python}
 
 # Plot ROC Curve for LightGBM
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 plt.plot(fpr_lgbm, tpr_lgbm, color="black", linewidth=2, label=f"AUC: {auc_value_LGBM}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = -0.05, fontsize=11)
 plt.legend()
 plt.show()
 ```
@@ -654,11 +704,11 @@ conf_df_lgbm = pd.DataFrame(conf_matrix_lgbm, index=["No Default", "Default"],
                             columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for LightGBM
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.heatmap(conf_df_lgbm, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = -0.05, fontsize=11)
 plt.show()
 
 ```
@@ -678,11 +728,11 @@ importance_df = pd.DataFrame({
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances in black and white with black outlines
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 4))
 sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = 0.0005, fontsize=11)
+plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
 ```
 
