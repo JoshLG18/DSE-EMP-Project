@@ -40,16 +40,13 @@ from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from sklearn.linear_model import LinearRegression
-
-
-
 ```
 
 \newpage
 
 ## **1. Introduction**
 
-Access to credit is a important driver of economic growth, allowing households or buisnesses to invest, expand and smooth consumption. However, credit risk remains a fundemental challenge for financial institutions, as loan defaulting can lead to substantial financial losses for both the company and for stakeholders. The ability to predict these defaults is vital for lending institutions to mitigate their risk and make more informed lending predictions. Recent advancements in machine learning (ML) have aided in the development of robust predictive models that outperform traditional credit-scoring methods (Yang, 2024)
+Access to credit is a important driver of economic growth, allowing households or businesses to invest, expand and smooth consumption. However, credit risk remains a fundamental challenge for financial institutions, as loan defaulting can lead to substantial financial losses for both the company and stakeholders. The ability to predict these defaults is vital for lending institutions to mitigate their risk and make more informed lending predictions. Recent advancements in machine learning (ML) have aided in the development of robust predictive models that outperform traditional credit-scoring methods (Yang, 2024)
 
 Ensemble methods such as Random Forest (RF), XGBoost, and Light Gradient Boosting Machines (LGBM), have shown significant promise in improving classification accuracy over traditional statistical methods (Yadav, 2025). These models offer enhanced predictive capacity due to their ability to capture non-linear relationships in borrower data, providing financial institutions with more reliable risk assessment (Roy, 2025)
 
@@ -59,7 +56,7 @@ Due to the increasing reliance on alternative data sources and advanced computat
 
 ## **2. Data**
 
-Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 28,501 observations.
+Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 28,501 observations, illustrated in Table 1.
 
 ```{python}
 loan_data = pd.read_csv('credit_risk_dataset.csv')
@@ -83,7 +80,7 @@ missing_values_df = pd.DataFrame({
 
 # Convert the DataFrame to LaTeX format with appropriate formatting
 missing_values_latex = missing_values_df.to_latex(index=False,
-                                                  caption="Missing Values in Each Column",
+                                                  caption="Missing Values in Each Variable",
                                                   label="Table:missing_values",
                                                   column_format="lc",
                                                   escape=False)
@@ -162,7 +159,7 @@ with open("variable_info_table.tex", "w") as f:
 
 \input{missing_values_table.tex}
 
-Talk about how missing values were handled. 
+Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing 887 and 3095 observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure (? Corr Matrix), therefore regression imputation was used to fill these missing variables and not lose sample size.
 
 ### **2.2 Descriptive Statistics**
 
@@ -191,9 +188,15 @@ latex_table = latex_table.replace("\\begin{table}", "\\begin{table}[H]\\centerin
 # Save to a LaTeX file
 with open("summary_table.tex", "w") as f:
     f.write(latex_table)
+
+loan_data = loan_data[loan_data['PersonAge'] < 123]
+loan_data = loan_data[loan_data['PersonEmpLength'] < 123]
+
 ```
 
 \input{summary_table.tex}
+
+Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of 144 and 123 years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations for *PersonEmpLength* were removed as to not impact the models. For *PersonAge*, all observations with ages above 122 years were removed. This left *PersonAge* with a maximum value of 94 and *PersonEmpLength* with a maximum value of 41, both which are reasonable.
 
 ### **2.3 Distribution Analysis**
 
@@ -203,11 +206,12 @@ with open("summary_table.tex", "w") as f:
 loan_data['LoanStatus'] = loan_data['LoanStatus'].astype('category')
 
 numeric_cols = loan_data.select_dtypes(include=[np.number]).columns
-num_cols = 4
+numeric_cols = numeric_cols.drop(['LoanGrade'])
+num_cols = 2
 num_rows = int(np.ceil(len(numeric_cols) / num_cols))
 
 plt.rcParams.update({'font.size': 75})
-plt.figure(figsize=(80, 25 * num_rows))
+plt.figure(figsize=(80, 20 * num_rows))
 for i, col in enumerate(numeric_cols, 1):
     plt.subplot(num_rows, num_cols, i)
     loan_data[col].hist(bins=30, edgecolor='black')
@@ -221,6 +225,8 @@ plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="cen
 plt.show()
 plt.rcParams.update({'font.size': 14})
 ```
+
+The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have negatively skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*,  *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
 
 ```{python}
 #Clearning pt 2
@@ -243,6 +249,8 @@ plt.xticks(rotation=45)
 plt.show()
 ```
 
+Figure 3 shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 4. The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
+
 ```{python}
 #Normalisation using z-score normalisation
 numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
@@ -259,6 +267,8 @@ plt.figtext(0.5, -0.4, "Figure ?: Box Plots of All Variables After Normalisation
 plt.xticks(rotation=45)
 plt.show()
 ```
+
+
 
 ```{python}
 # Calculate distribution before downsampling
@@ -291,18 +301,19 @@ loan_data = loan_data_balanced
 
 ```{python}
 # Plot the stacked bar plot
-plt.figure(figsize=(10, 4))
-sns.barplot(x='Stage', y='Count', hue='LoanStatus', data=distribution_df, palette='gray')
+plt.figure(figsize=(10, 8))
+sns.barplot(x='Stage', y='Count',hue = 'LoanStatus', data=distribution_df, palette='gray')
 plt.xlabel('Stage')
 plt.ylabel('Count')
-plt.figtext(0.5, -0.07, "Figure ?: Distribution of Default Before and After Downsampling", ha="center", fontsize=11)
+plt.figtext(0.5, -0.03, "Figure ?: Distribution of LoanStatus Before and After Downsampling", ha="center", fontsize=11)
 plt.legend(title='Default', loc='upper right')
 plt.show()
 ```
 
-Downsampled the dataset to ensure that the models didn't get affected by the magnitude of the majority class = can affect performance metrics. Allows a higher recall score
+Figure 5 demonstrates the the distribution of *LoanStatus*. Before downsampling there was a large discrepancy between the number of people who defaulted and who didn't. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, downsampling was performed to ensure both outcomes had the same number of observations, shown in Figure 6
 
 ### **2.4 Correlation Analysis**
+
 ```{python}
 # Split the data into test and train
 train_data, test_data = train_test_split(loan_data, test_size=0.2, random_state=123)
@@ -316,11 +327,15 @@ y_test = test_data['LoanStatus']
 ```{python}
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
+plt.rcParams.update({'font.size': 24})
+
 # Correlation plot
-plt.figure(figsize=(12, 10))
+plt.figure(figsize=(20, 15))
 sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
-plt.figtext(0.5, -0.14, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=16)
+plt.figtext(0.5, -0.20, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=26)
 plt.show()
+
+plt.rcParams.update({'font.size': 14})
 
 # Add a constant term for intercept
 X_train_vif = sm.add_constant(X_train)
@@ -348,13 +363,19 @@ with open("vif_table.tex", "w") as f:
     f.write(vif_latex)
 ```
 
+Figure 7 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = 0.80). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
+
 \input{vif_table.tex}
 
-Due to high multicollinearity between some variables, when using logistic regresion ridge and lasso regression are implemented to reduce effects of multicollinearity. Other models handle multicollinearity
+VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
+
+Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict *LoanStatus* using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
 ## **3. Results and Discussion**
 
 ### **3.1 Logistic Regression**
+
+The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with. 
 
 ```{python}
 import sys
@@ -414,6 +435,8 @@ plt.legend()
 plt.show()
 ```
 
+Figure ? shows the ROC graph for the LR model
+
 ```{python}
 # Convert Confusion Matrix to DataFrame for Visualization
 conf_df_lr = pd.DataFrame(conf_matrix_lr, index=["No Default", "Default"],
@@ -427,6 +450,8 @@ plt.ylabel("Actual Class")
 plt.figtext(0.5, -0.1, "Figure ?: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=11)
 plt.show()
 ```
+
+Conf Matrix...
 
 ```{python}
 # Fit logistic regression model using statsmodels for odds ratios
@@ -451,6 +476,8 @@ plt.ylabel('Features')
 plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios for Logistic Regression Model", ha = "center", fontsize=14)
 plt.show()
 ```
+
+Odds ratios were calculated allowing an easy interpretation of the relationships between the factors and credit risk. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable.
 
 ### **3.2 Random Forest**
 
@@ -639,7 +666,7 @@ plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, font
 plt.show()
 ```
 
-### **3.4  Light Gradient Boosted Machine**
+### **3.4 Light Gradient Boosted Machine**
 
 ```{python}
 
@@ -757,7 +784,6 @@ plt.figtext(0.5, -0.1, "Figure ?: Accuracy for Each Model", ha="center", fontsiz
 plt.show()
 
 ```
-
 
 ```{python}
 # Log Loss
