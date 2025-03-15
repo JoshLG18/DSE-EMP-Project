@@ -59,7 +59,7 @@ Due to the increasing reliance on alternative data sources and advanced computat
 Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 28,501 observations, illustrated in Table 1.
 
 ```{python}
-loan_data = pd.read_csv('credit_risk_dataset.csv')
+loan_data = pd.read_csv('Data/credit_risk_dataset.csv')
 
 loan_data.columns = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanStatus', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
 
@@ -88,7 +88,7 @@ missing_values_latex = missing_values_df.to_latex(index=False,
 missing_values_latex = missing_values_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 # Save to a LaTeX file
-with open("missing_values_table.tex", "w") as f:
+with open("Tables/missing_values_table.tex", "w") as f:
     f.write(missing_values_latex)
 
 
@@ -149,7 +149,7 @@ variable_info_latex = variable_info.to_latex(index=False,
 variable_info_latex = variable_info_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 # Save to a LaTeX file
-with open("variable_info_table.tex", "w") as f:
+with open("Tables/variable_info_table.tex", "w") as f:
     f.write(variable_info_latex)
 ```
 
@@ -257,8 +257,7 @@ numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLe
 from sklearn.preprocessing import QuantileTransformer
 
 # Apply Quantile Transformation = due to skewness of the data
-scaler = QuantileTransformer(output_distribution='normal')
-loan_data[numeric_cols] = scaler.fit_transform(loan_data[numeric_cols])
+ƒ
 
 # Box plots for all numeric variables post normalisation
 plt.figure(figsize=(12,4))
@@ -359,7 +358,7 @@ vif_latex = vif_data.to_latex(index=False,
 vif_latex = vif_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 vif_latex = vif_latex.replace("\\end{table}", "\\end{table}")
 # Save to a LaTeX file
-with open("vif_table.tex", "w") as f:
+with open("Tables/vif_table.tex", "w") as f:
     f.write(vif_latex)
 ```
 
@@ -825,7 +824,7 @@ performance_latex = performance_latex.replace("AUC", "AUC")
 performance_latex = performance_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
 # Save to a LaTeX file
-with open("performance_table.tex", "w") as f:
+with open("Tables/performance_table.tex", "w") as f:
     f.write(performance_latex)
 ```
 
