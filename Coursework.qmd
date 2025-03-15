@@ -87,8 +87,16 @@ missing_values_latex = missing_values_df.to_latex(index=False,
 
 missing_values_latex = missing_values_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
-# Save to a LaTeX file
-with open("Tables/missing_values_table.tex", "w") as f:
+import os
+
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "missing_values_latex.tex")
+
+# Save the LaTeX file
+with open(file_path, "w") as f:
     f.write(missing_values_latex)
 
 
@@ -148,8 +156,14 @@ variable_info_latex = variable_info.to_latex(index=False,
 
 variable_info_latex = variable_info_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "variable_info_table.tex")
+
 # Save to a LaTeX file
-with open("Tables/variable_info_table.tex", "w") as f:
+with open(file_path, "w") as f:
     f.write(variable_info_latex)
 ```
 
@@ -185,8 +199,14 @@ latex_table = summary_stats.to_latex(index=False,
 
 latex_table = latex_table.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "summary_table.tex")
+
 # Save to a LaTeX file
-with open("summary_table.tex", "w") as f:
+with open(file_path, "w") as f:
     f.write(latex_table)
 
 loan_data = loan_data[loan_data['PersonAge'] < 123]
@@ -257,7 +277,7 @@ numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLe
 from sklearn.preprocessing import QuantileTransformer
 
 # Apply Quantile Transformation = due to skewness of the data
-ƒ
+
 
 # Box plots for all numeric variables post normalisation
 plt.figure(figsize=(12,4))
@@ -357,8 +377,15 @@ vif_latex = vif_data.to_latex(index=False,
                               escape=False)
 vif_latex = vif_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 vif_latex = vif_latex.replace("\\end{table}", "\\end{table}")
+
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "vif_latex.tex")
+
 # Save to a LaTeX file
-with open("Tables/vif_table.tex", "w") as f:
+with open(file_path, "w") as f:
     f.write(vif_latex)
 ```
 
@@ -366,7 +393,7 @@ Figure 7 shows a correlation plot quantifying the relationships between the vari
 
 \input{vif_table.tex}
 
-VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
+VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 9 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
 
 Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict *LoanStatus* using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
@@ -823,8 +850,14 @@ performance_latex = performance_df.to_latex(index=False,
 performance_latex = performance_latex.replace("AUC", "AUC")
 performance_latex = performance_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
 
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "performance_latex.tex")
+
 # Save to a LaTeX file
-with open("Tables/performance_table.tex", "w") as f:
+with open(file_path, "w") as f:
     f.write(performance_latex)
 ```
 
