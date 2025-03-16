@@ -36,10 +36,10 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
-from sklearn.linear_model import LinearRegression
 ```
 
 \newpage
@@ -588,17 +588,17 @@ feature_importances = best_rf_model.feature_importances_
 features = X_train.columns
 
 # Create a DataFrame for plotting
-importance_df = pd.DataFrame({
+importance_df_rf = pd.DataFrame({
     'Feature': features,
     'Importance': feature_importances
 })
 
 # Sort the DataFrame by importance values
-importance_df = importance_df.sort_values(by='Importance', ascending=False)
+importance_df_rf = importance_df_rf.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
 plt.figure(figsize=(8, 4))
-sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
+sns.barplot(x='Importance', y='Feature', data=importance_df_rf, palette=sns.color_palette("Greys", n_colors=len(importance_df_rf)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = -0.05, fontsize=14, x = 0.5)
@@ -679,17 +679,17 @@ feature_importances = best_xgb_model.feature_importances_
 features = X_train.columns
 
 # Create a DataFrame for plotting
-importance_df = pd.DataFrame({
+importance_df_xgb = pd.DataFrame({
     'Feature': features,
     'Importance': feature_importances
 })
 
 # Sort the DataFrame by importance values
-importance_df = importance_df.sort_values(by='Importance', ascending=False)
+importance_df_xgb = importance_df_xgb.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
 plt.figure(figsize=(8, 4))
-sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
+sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=14, x = 0.5)
@@ -776,17 +776,17 @@ feature_importances = best_lgbm_model.feature_importances_
 features = X_train.columns
 
 # Create a DataFrame for plotting
-importance_df = pd.DataFrame({
+importance_df_lgbm = pd.DataFrame({
     'Feature': features,
     'Importance': feature_importances
 })
 
 # Sort the DataFrame by importance values
-importance_df = importance_df.sort_values(by='Importance', ascending=False)
+importance_df_lgbm = importance_df_lgbm.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances in black and white with black outlines
 plt.figure(figsize=(8, 4))
-sns.barplot(x='Importance', y='Feature', data=importance_df, palette=sns.color_palette("Greys", n_colors=len(importance_df)), edgecolor='black')
+sns.barplot(x='Importance', y='Feature', data=importance_df_lgbm, palette=sns.color_palette("Greys", n_colors=len(importance_df_lgbm)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=14, x = 0.5)
@@ -866,6 +866,44 @@ with open(file_path, "w") as f:
 ```
 
 \input{Tables/performance_latex.tex}
+
+```{python}
+# Extract top 3 features for each model
+top_features_lr = conf.index[-3:].tolist()  # Logistic Regression (based on Odds Ratios)
+top_features_rf = importance_df_rf.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
+top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # XGBoost
+top_features_lgbm = importance_df_lgbm.nlargest(3, 'Importance')['Feature'].tolist()  # LightGBM
+
+# Create a DataFrame for top features
+top_features_df = pd.DataFrame({
+    "Logistic Regression": top_features_lr,
+    "Random Forest": top_features_rf,
+    "XGBoost": top_features_xgb,
+    "LightGBM": top_features_lgbm
+}, index=["Feature 1", "Feature 2", "Feature 3"])  # Rename row labels
+
+# Convert the DataFrame to LaTeX format
+top_features_latex = top_features_df.to_latex(
+                                              caption="Top 3 Most Important Variables for Each Model",
+                                              label="Table:top_features",
+                                              column_format="lcccc",
+                                              escape=False)
+
+top_features_latex = top_features_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
+
+# Ensure the directory exists
+os.makedirs("Tables", exist_ok=True)
+
+# Define the full file path
+file_path = os.path.join("Tables", "top_features_table.tex")
+
+# Save to a LaTeX file
+with open(file_path, "w") as f:
+    f.write(top_features_latex)
+```
+
+\input{Tables/top_features_table.tex}
+
 
 ## **4. Conclusion**
 

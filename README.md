@@ -13,6 +13,9 @@ The libraries used in this project are:
 - seaborn 0.13.2
 - sklearn 1.6.1
 - scipy 1.15.2
+- xgboost 2.1.4
+- lightgbm 4.6.0
+- statsmodels 0.14.4
 
 ## Files
 - Coursework.qmd contains all the code and analysis for the project.
@@ -22,3 +25,5 @@ The libraries used in this project are:
 - Data/  contains the data used in the project.
 - Tables/ contains the tables generated in the project.
 
+## How to reproduce the results
+- To reproduce the results, you can run the code in Coursework.qmd in a Jupyter notebook or any other markdown editor.
