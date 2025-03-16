@@ -1,7 +1,7 @@
 ---
 title: "Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis"
 author: "Student Number - 720017170"
-subtitle: BEE2041 - Data Science in Economics
+subtitle: BEE2041 Data Science in Economics - Empirical Project
 format: pdf
 toc: true
 execute:
@@ -62,7 +62,7 @@ Due to the increasing reliance on alternative data sources and advanced computat
 
 ## **2. Data**
 
-Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 28,501 observations, illustrated in Table 1.
+Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 32,581 observations, illustrated in Table 1.
 
 ```{python}
 loan_data = pd.read_csv('Data/credit_risk_dataset.csv')
@@ -177,7 +177,7 @@ with open(file_path, "w") as f:
 
 \input{Tables/missing_values_latex.tex}
 
-Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing 887 and 3095 observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure (? Corr Matrix), therefore regression imputation was used to fill these missing variables and not lose sample size.
+Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing 887 and 3095 observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure (? Corr Matrix), therefore regression imputation was used to fill these missing variables and not lose sample size. Also, any duplicate observations were removed to remove their impact on the models, this reduced the sample size to 32,415.
 
 ### **2.2 Descriptive Statistics**
 
@@ -220,7 +220,7 @@ loan_data = loan_data[loan_data['PersonEmpLength'] < 123]
 
 \input{Tables/summary_table.tex}
 
-Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of 144 and 123 years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations for *PersonEmpLength* were removed as to not impact the models. For *PersonAge*, all observations with ages above 122 years were removed. This left *PersonAge* with a maximum value of 94 and *PersonEmpLength* with a maximum value of 41, both which are reasonable.
+Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of 144 and 123 years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations where *PersonEmpLength* was 144 were removed as to not impact the models. For *PersonAge*, all observations with ages above 122 years were removed. This left *PersonAge* with a maximum value of 94 and *PersonEmpLength* with a maximum value of 41, which both are reasonable.
 
 ### **2.3 Distribution Analysis**
 
@@ -245,12 +245,12 @@ for i, col in enumerate(numeric_cols, 1):
     plt.xticks(rotation=45)  # Tilt the x-axis labels by 45 degrees
 
 plt.tight_layout()
-plt.figtext(0.5, -0.01, "Figure ?: Histograms of all Numeric Variables", ha="center", fontsize=90)
+plt.figtext(0.5, -0.01, "Figure 1: Histograms of all Numeric Variables", ha="center", fontsize=90)
 plt.show()
 plt.rcParams.update({'font.size': 14})
 ```
 
-The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have negatively skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*,  *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
+The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positivley skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*,  *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
 
 ```{python}
 #Clearning pt 2
@@ -268,12 +268,12 @@ for col in categorical_cols:
 plt.rcParams.update({'font.size': 12})
 plt.figure(figsize=(12, 4))
 loan_data.boxplot()
-plt.figtext(0.5, -0.4, "Figure ?: Box Plots of All Variables Before Normalisation", ha="center", fontsize=11)
+plt.figtext(0.5, -0.4, "Figure 2: Box Plots of All Variables Before Normalisation", ha="center", fontsize=11)
 plt.xticks(rotation=45)
 plt.show()
 ```
 
-Figure 3 shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 4. The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
+Figure 2 shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 3. The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
 
 ```{python}
 #Normalisation using z-score normalisation
@@ -289,12 +289,10 @@ loan_data[numeric_cols] = pd.DataFrame(scaler.fit_transform(loan_data[numeric_co
 # Box plots for all numeric variables post normalisation
 plt.figure(figsize=(12,4))
 loan_data.boxplot()
-plt.figtext(0.5, -0.4, "Figure ?: Box Plots of All Variables After Normalisation", ha="center", fontsize=11)
+plt.figtext(0.5, -0.4, "Figure 3: Box Plots of All Variables After Normalisation", ha="center", fontsize=11)
 plt.xticks(rotation=45)
 plt.show()
 ```
-
-
 
 ```{python}
 # Calculate distribution before downsampling
@@ -331,12 +329,12 @@ plt.figure(figsize=(10, 8))
 sns.barplot(x='Stage', y='Count',hue = 'LoanStatus', data=distribution_df, palette='gray')
 plt.xlabel('Stage')
 plt.ylabel('Count')
-plt.figtext(0.5, -0.03, "Figure ?: Distribution of LoanStatus Before and After Downsampling", ha="center", fontsize=11)
+plt.figtext(0.5, -0.03, "Figure 4: Distribution of LoanStatus Before and After Downsampling", ha="center", fontsize=11)
 plt.legend(title='Default', loc='upper right')
 plt.show()
 ```
 
-Figure 5 demonstrates the the distribution of *LoanStatus*. Before downsampling there was a large discrepancy between the number of people who defaulted and who didn't. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, downsampling was performed to ensure both outcomes had the same number of observations, shown in Figure 6
+Figure 4 demonstrates the the distribution of *LoanStatus*. Before downsampling there was a large discrepancy between the number of people who defaulted and who didn't. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, downsampling was performed to ensure both outcomes had the same number of observations, shown in Figure 4
 
 ### **2.4 Correlation Analysis**
 
@@ -358,7 +356,7 @@ plt.rcParams.update({'font.size': 24})
 # Correlation plot
 plt.figure(figsize=(20, 15))
 sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
-plt.figtext(0.5, -0.20, "Figure ?: Correlation Plot of All Variables ", ha="center", fontsize=26)
+plt.figtext(0.5, -0.20, "Figure 5: Correlation Plot of All Variables ", ha="center", fontsize=26)
 plt.show()
 
 plt.rcParams.update({'font.size': 14})
@@ -371,7 +369,7 @@ vif_data = pd.DataFrame()
 vif_data["Feature"] = X_train_vif.columns
 vif_data["VIF"] = [variance_inflation_factor(X_train_vif.values, i) for i in range(X_train_vif.shape[1])]
 
-vif_data["VIF"] = vif_data["VIF"].astype(float).round(3)
+vif_data["VIF"] = vif_data["VIF"].astype(float).round(3).astype(str)
 
 # Drop the constant term from the VIF DataFrame
 vif_data = vif_data[vif_data["Feature"] != "const"]
@@ -396,14 +394,15 @@ with open(file_path, "w") as f:
     f.write(vif_latex)
 ```
 
-Figure 7 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = 0.80). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
+Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = 0.80). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
 
 \input{Tables/vif_latex.tex}
 
-VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
+VIF values for all the variables are shown within Table 4. In contrast to Figure 5, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based and handle multicollinearity well, therefore no futher processing is needed. 
 
-Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict *LoanStatus* using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
+Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
+\newpage
 ## **3. Results and Discussion**
 
 ### **3.1 Logistic Regression**
@@ -456,33 +455,35 @@ auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
 
 ```{python}
 # Plot ROC Curve for Logistic Regression
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.figtext(0.5, -0.1, "Figure ?: ROC Curve for Logistic Regression Model", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure 6: ROC Curve for Logistic Regression Model", ha="center", fontsize=11)
 plt.legend()
 plt.show()
 ```
 
-Figure ? shows the ROC graph for the LR model
+Figure 6 shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved a AUC score of 0.833 which is considered considerable (Çorbacıoğlu, 2023), indicating solid predictive performance when distinguishing between positive outcomes. The model's curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to true positive rate (TPR) remaining below 0.9.
 
 ```{python}
+plt.rcParams.update({'font.size': 11})
+
 # Convert Confusion Matrix to DataFrame for Visualization
 conf_df_lr = pd.DataFrame(conf_matrix_lr, index=["No Default", "Default"],
                           columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for Logistic Regression
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 2.5))
 sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.figtext(0.5, -0.1, "Figure ?: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=11)
+plt.figtext(0.5, -0.15, "Figure 7: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=9)
 plt.show()
 ```
 
-Conf Matrix...
+Figure 7 visualises the error within the classification model. The matrix reveals that the model correctly identified 1,083 non-default cases (true negatives) and 1,093 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 337 non-default cases were misclassified as defaults (false positives), while 323 default cases were incorrectly predicted as non-defaults (false negatives), potentially leading to losses in revenue for a financial institution.
 
 ```{python}
 # Fit logistic regression model using statsmodels for odds ratios
@@ -499,18 +500,20 @@ conf = conf.reindex((conf['OR'] - 1).abs().sort_values(ascending=True).index)
 conf = conf.drop(['const'])
 
 # Plot odds ratios as a forest plot with 95% confidence intervals
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 3))
 plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
 plt.axvline(x=1, linestyle='--', color='red')
 plt.xlabel('Odds Ratio')
 plt.ylabel('Features')
-plt.figtext(0.5, -0.1, "Figure ?: Odds Ratios for Logistic Regression Model", ha = "center", fontsize=14)
+plt.figtext(0.5, -0.1, "Figure 8: Odds Ratios for Logistic Regression Model", ha = "center", fontsize=10)
 plt.show()
+plt.rcParams.update({'font.size': 14})
 ```
 
-Odds ratios were calculated allowing an easy interpretation of the relationships between the factors and credit risk. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable.
+Figure 8 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that *LoanIntRate* and *LoanPercentIncome* have the strongest positive associations with default, with odds ratios of 2.629 and 2.034, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, *PersonIncome* has an odds ratio of 0.587, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.
 
 ### **3.2 Random Forest**
+The second model that was developed was an RF  
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -558,7 +561,7 @@ auc_value_RF = round(auc(fpr_rf, tpr_rf), 3)
 
 ```{python}
 # Plot ROC Curve for Random Forest
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 plt.plot(fpr_rf, tpr_rf, color="black", linewidth=2, label=f"AUC: {auc_value_RF}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
@@ -569,12 +572,14 @@ plt.show()
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 11})
+
 # Convert Confusion Matrix to DataFrame for Visualization
 conf_df_rf = pd.DataFrame(conf_matrix_rf, index=["No Default", "Default"],
                           columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for Random Forest
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 3))
 sns.heatmap(conf_df_rf, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
@@ -598,12 +603,14 @@ importance_df_rf = pd.DataFrame({
 importance_df_rf = importance_df_rf.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 3))
 sns.barplot(x='Importance', y='Feature', data=importance_df_rf, palette=sns.color_palette("Greys", n_colors=len(importance_df_rf)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
+plt.rcParams.update({'font.size': 14})
+
 ```
 
 ### **3.3 XGBoost**
@@ -650,7 +657,7 @@ auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
 
 ```{python}
 # Plot ROC Curve for XGBoost
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_XGB}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
@@ -666,7 +673,7 @@ conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
                        columns=["No Default", "Default"])
 
 # Plot Confusion Matrix
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
@@ -689,7 +696,7 @@ importance_df_xgb = pd.DataFrame({
 importance_df_xgb = importance_df_xgb.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
@@ -700,8 +707,6 @@ plt.show()
 ### **3.4 Light Gradient Boosted Machine**
 
 ```{python}
-
-# Build the neural network model
 # Define the parameter grid for Grid Search
 param_grid = {
     'n_estimators': [50, 100],
@@ -746,7 +751,7 @@ auc_value_LGBM = round(auc(fpr_lgbm, tpr_lgbm), 3)
 ```{python}
 
 # Plot ROC Curve for LightGBM
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 plt.plot(fpr_lgbm, tpr_lgbm, color="black", linewidth=2, label=f"AUC: {auc_value_LGBM}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
@@ -762,7 +767,7 @@ conf_df_lgbm = pd.DataFrame(conf_matrix_lgbm, index=["No Default", "Default"],
                             columns=["No Default", "Default"])
 
 # Plot Confusion Matrix for LightGBM
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df_lgbm, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
@@ -786,7 +791,7 @@ importance_df_lgbm = pd.DataFrame({
 importance_df_lgbm = importance_df_lgbm.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances in black and white with black outlines
-plt.figure(figsize=(8, 4))
+plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_lgbm, palette=sns.color_palette("Greys", n_colors=len(importance_df_lgbm)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
