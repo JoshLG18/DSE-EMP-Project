@@ -167,11 +167,11 @@ with open(file_path, "w") as f:
     f.write(variable_info_latex)
 ```
 
-\input{variable_info_table.tex}
+\input{Tables/variable_info_table.tex}
 
 ### **2.1 Preparing the Data**
 
-\input{missing_values_table.tex}
+\input{Tables/missing_values_latex.tex}
 
 Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing 887 and 3095 observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure (? Corr Matrix), therefore regression imputation was used to fill these missing variables and not lose sample size.
 
@@ -214,7 +214,7 @@ loan_data = loan_data[loan_data['PersonEmpLength'] < 123]
 
 ```
 
-\input{summary_table.tex}
+\input{Tables/summary_table.tex}
 
 Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of 144 and 123 years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations for *PersonEmpLength* were removed as to not impact the models. For *PersonAge*, all observations with ages above 122 years were removed. This left *PersonAge* with a maximum value of 94 and *PersonEmpLength* with a maximum value of 41, both which are reasonable.
 
@@ -277,7 +277,11 @@ numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLe
 from sklearn.preprocessing import QuantileTransformer
 
 # Apply Quantile Transformation = due to skewness of the data
+scaler = QuantileTransformer(output_distribution='normal')
 
+# Transform the numeric columns and ensure the DataFrame structure is maintained
+loan_data[numeric_cols] = pd.DataFrame(scaler.fit_transform(loan_data[numeric_cols]), 
+                                       columns=numeric_cols, index=loan_data.index)
 
 # Box plots for all numeric variables post normalisation
 plt.figure(figsize=(12,4))
@@ -391,9 +395,9 @@ with open(file_path, "w") as f:
 
 Figure 7 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = 0.80). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
 
-\input{vif_table.tex}
+\input{Tables/vif_latex.tex}
 
-VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 9 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
+VIF values for all the variables are shown within Table 4. In contrast to Figure 7, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based why handle multicollinearity well, therefore no futher processing is needed. 
 
 Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict *LoanStatus* using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
@@ -861,8 +865,8 @@ with open(file_path, "w") as f:
     f.write(performance_latex)
 ```
 
-\input{performance_table.tex}
+\input{Tables/performance_latex.tex}
 
 ## **4. Conclusion**
 
-[Link to Github Repository = https://github.com/JoshLG18/DSE-EMP-Project](https://github.com/JoshLG18/DSE-EMP-Project)
+[Link to Github Repository = BEE2041 Data Science In Economics Empirical Project](https://github.com/JoshLG18/DSE-EMP-Project)

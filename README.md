@@ -17,6 +17,8 @@ The libraries used in this project are:
 ## Files
 - Coursework.qmd contains all the code and analysis for the project.
 - Coursework.pdf is the pdf version of the project.
+- Apa.csl is the citation style used in the project.
+- References.bib contains the references used in the project.
 - Data/  contains the data used in the project.
 - Tables/ contains the tables generated in the project.
 
