@@ -14,6 +14,10 @@ header-includes:
 ---
 
 ```{python}
+import os
+import sys
+
+#Pre-processing
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,7 +38,9 @@ from sklearn.metrics import brier_score_loss
 from sklearn.metrics import precision_recall_curve, roc_curve, f1_score
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+from sklearn.preprocessing import QuantileTransformer
 
+# ML Models
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -52,7 +58,7 @@ Ensemble methods such as Random Forest (RF), XGBoost, and Light Gradient Boostin
 
 This study aims to explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression (LR), RF, XGBoost and LGBM have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve (AUC). Moreover, exploratory data analysis will be conducted to examine the distribution of important financial variables, identify correlations and allow for optimised feature selection to improve model performance.
 
-Due to the increasing reliance on alternative data sources and advanced computational methods in the financial sector, the results of this study may have significant practical implications. Improved credit risk analysis can help lenders reduce default rates, minimise losses and promote more inclusive access to credit (Ellsworth, 2025). By leveraging the latest ML methods, this project aims to contribute to the growing body of research on predictive analytics in finance and support more robust lending practices (Khoshkhoy Nilash & Esmaeilpour, 2025).
+Due to the increasing reliance on alternative data sources and advanced computational methods in the financial sector, the results of this study may have significant practical implications. Improved credit risk analysis can help lenders reduce default rates, minimise losses and promote more inclusive access to credit (Ellsworth, 2025). By leveraging the latest ML methods, this project aims to contribute to the growing body of research on predictive analytics in finance and support more robust lending practices.
 
 ## **2. Data**
 
@@ -86,8 +92,6 @@ missing_values_latex = missing_values_df.to_latex(index=False,
                                                   escape=False)
 
 missing_values_latex = missing_values_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
-
-import os
 
 # Ensure the directory exists
 os.makedirs("Tables", exist_ok=True)
@@ -274,7 +278,6 @@ Figure 3 shows that the data isn't scaled proportionally, therefore we need to a
 ```{python}
 #Normalisation using z-score normalisation
 numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
-from sklearn.preprocessing import QuantileTransformer
 
 # Apply Quantile Transformation = due to skewness of the data
 scaler = QuantileTransformer(output_distribution='normal')
@@ -408,8 +411,6 @@ Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict
 The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with. 
 
 ```{python}
-import sys
-import os
 sys.stdout = open(os.devnull, 'w')
 
 # Define the parameter grid for Grid Search
