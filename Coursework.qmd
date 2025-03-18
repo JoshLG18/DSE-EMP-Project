@@ -16,6 +16,8 @@ header-includes:
 ```{python}
 import os
 import sys
+import quarto
+
 
 #Pre-processing
 import pandas as pd
@@ -62,18 +64,22 @@ Due to the increasing reliance on alternative data sources and advanced computat
 
 ## **2. Data**
 
-Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 32,581 observations, illustrated in Table 1.
+```{python}
+#Loading the data
+loan_data = pd.read_csv('Data/credit_risk_dataset.csv')
+nrows_pre = loan_data.shape[0]
+ncol_pre = loan_data.shape[1]
+loan_data.columns = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanStatus', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
+```
+
+Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of `{python} str(ncol_pre)` variables/columns and `{python} str(nrows_pre)` observations, illustrated in Table 1.
 
 ```{python}
-loan_data = pd.read_csv('Data/credit_risk_dataset.csv')
-
-loan_data.columns = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanStatus', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
-
 # Data Cleaning
 
 # Drop duplicate rows if any
 loan_data.drop_duplicates(inplace=True)
-
+nrow_post = loan_data.shape[0]
 # Handle missing values
 # Calculate the number of missing values for each column
 missing_values = loan_data.isnull().sum()
@@ -92,6 +98,10 @@ missing_values_latex = missing_values_df.to_latex(index=False,
                                                   escape=False)
 
 missing_values_latex = missing_values_latex.replace("\\begin{table}", "\\begin{table}[H]\\centering")
+
+# Extract valyes where missings occur
+for col in missing_values_df["Variable"]:  # Use the 'Variable' column instead of the index
+    globals()[f"missing_{col}"] = missing_values_df.loc[missing_values_df["Variable"] == col, "Missing Values"].values[0]
 
 # Ensure the directory exists
 os.makedirs("Tables", exist_ok=True)
@@ -177,7 +187,7 @@ with open(file_path, "w") as f:
 
 \input{Tables/missing_values_latex.tex}
 
-Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing 887 and 3095 observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure (? Corr Matrix), therefore regression imputation was used to fill these missing variables and not lose sample size. Also, any duplicate observations were removed to remove their impact on the models, this reduced the sample size to 32,415.
+Table 2 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing `{python} str(missing_PersonEmpLength)` and `{python} str(missing_LoanIntRate)` observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the negatively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure 5, therefore regression imputation was used to fill these missing variables and not lose sample size. Also, any duplicate observations were removed to remove their impact on the models, this reduced the sample size to `{python} str(nrow_post)` observations.
 
 ### **2.2 Descriptive Statistics**
 
@@ -213,14 +223,18 @@ file_path = os.path.join("Tables", "summary_table.tex")
 with open(file_path, "w") as f:
     f.write(latex_table)
 
+max_PA = loan_data['PersonAge'].max()
+max_PEL = loan_data['PersonEmpLength'].max().astype(int)
 loan_data = loan_data[loan_data['PersonAge'] < 123]
 loan_data = loan_data[loan_data['PersonEmpLength'] < 123]
+max_PA_after = loan_data['PersonAge'].max()
+max_PEL_after = loan_data['PersonEmpLength'].max().astype(int)
 
 ```
 
 \input{Tables/summary_table.tex}
 
-Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of 144 and 123 years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations where *PersonEmpLength* was 144 were removed as to not impact the models. For *PersonAge*, all observations with ages above 122 years were removed. This left *PersonAge* with a maximum value of 94 and *PersonEmpLength* with a maximum value of 41, which both are reasonable.
+Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of `{python} str(max_PA)` and `{python} str(max_PEL)` years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations where *PersonEmpLength* was `{python} str(max_PEL)`  were removed as to not impact the models. For *PersonAge*, all observations with ages above `{python} str(max_PA)` years were removed. This left *PersonAge* with a maximum value of `{python} str(max_PA_after)` and *PersonEmpLength* with a maximum value of `{python} str(max_PEL_after)`, which both are reasonable.
 
 ### **2.3 Distribution Analysis**
 
@@ -352,12 +366,16 @@ y_test = test_data['LoanStatus']
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 plt.rcParams.update({'font.size': 24})
+correlation_matrix = loan_data.corr(method='spearman')
 
 # Correlation plot
 plt.figure(figsize=(20, 15))
-sns.heatmap(loan_data.corr(method='spearman'), annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
+sns.heatmap(correlation_matrix, annot=True, cmap='Greys', fmt='.2f', linewidths=0.5)
 plt.figtext(0.5, -0.20, "Figure 5: Correlation Plot of All Variables ", ha="center", fontsize=26)
 plt.show()
+
+LG_vs_LIR = correlation_matrix.loc["LoanIntRate", "LoanGrade"].round(2)
+PA_vs_CH = correlation_matrix.loc["CredHistory", "PersonAge"].round(2)
 
 plt.rcParams.update({'font.size': 14})
 
@@ -394,7 +412,7 @@ with open(file_path, "w") as f:
     f.write(vif_latex)
 ```
 
-Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = 0.80). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
+Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
 
 \input{Tables/vif_latex.tex}
 
@@ -451,6 +469,7 @@ f1_scoreLR = round(f1_score(y_test, lr_predictions), 3)
 # Compute ROC Curve and AUC Score
 fpr_lr, tpr_lr, _ = roc_curve(y_test, lr_probabilities)
 auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
+
 ```
 
 ```{python}
@@ -465,7 +484,7 @@ plt.legend()
 plt.show()
 ```
 
-Figure 6 shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved a AUC score of 0.833 which is considered considerable (Çorbacıoğlu, 2023), indicating solid predictive performance when distinguishing between positive outcomes. The model's curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to true positive rate (TPR) remaining below 0.9.
+Figure 6 shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved a AUC score of `{python} str(auc_value_LR)` which is considered considerable (Çorbacıoğlu, 2023), indicating solid predictive performance when distinguishing between positive outcomes. The model's curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to true positive rate (TPR) remaining below 0.9.
 
 ```{python}
 plt.rcParams.update({'font.size': 11})
@@ -481,9 +500,15 @@ plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.figtext(0.5, -0.15, "Figure 7: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=9)
 plt.show()
+
+TN = conf_df_lr.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP = conf_df_lr.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN = conf_df_lr.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP = conf_df_lr.iloc[1, 1]  # True Positives (Default correctly classified)
+
 ```
 
-Figure 7 visualises the error within the classification model. The matrix reveals that the model correctly identified 1,083 non-default cases (true negatives) and 1,093 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 337 non-default cases were misclassified as defaults (false positives), while 323 default cases were incorrectly predicted as non-defaults (false negatives), potentially leading to losses in revenue for a financial institution.
+Figure 7 visualises the error within the classification model. The matrix reveals that the model correctly identified `{python} str(TN)` non-default cases (true negatives) and `{python} str(TP)` default cases (true positives), demonstrating its ability to capture both classes effectively. However, `{python} str(FP)` non-default cases were misclassified as defaults (false positives), while `{python} str(FN)` default cases were incorrectly predicted as non-defaults (false negatives), potentially leading to losses in revenue for a financial institution.
 
 ```{python}
 # Fit logistic regression model using statsmodels for odds ratios
@@ -499,6 +524,15 @@ conf.columns = ['2.5%', '97.5%', 'OR']
 conf = conf.reindex((conf['OR'] - 1).abs().sort_values(ascending=True).index)
 conf = conf.drop(['const'])
 
+top_features_lr = conf.index[-3:].tolist()  # Logistic Regression (based on Odds Ratios)
+Feature_1 = top_features_lr[2]
+Feature_2 = top_features_lr[1]
+Feature_3 = top_features_lr[0]
+
+odds_Feature_1 = odds_ratios[Feature_1].round(3)
+odds_Feature_2 = odds_ratios[Feature_2].round(3)
+odds_Feature_3 = odds_ratios[Feature_3].round(3)
+
 # Plot odds ratios as a forest plot with 95% confidence intervals
 plt.figure(figsize=(8, 3))
 plt.errorbar(conf['OR'], conf.index, xerr=[conf['OR'] - conf['2.5%'], conf['97.5%'] - conf['OR']], fmt='o', color='black', ecolor='gray', capsize=3)
@@ -510,7 +544,7 @@ plt.show()
 plt.rcParams.update({'font.size': 14})
 ```
 
-Figure 8 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that *LoanIntRate* and *LoanPercentIncome* have the strongest positive associations with default, with odds ratios of 2.629 and 2.034, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, *PersonIncome* has an odds ratio of 0.587, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.
+Figure 8 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)` , respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.
 
 ### **3.2 Random Forest**
 The second model that was developed was an RF  
@@ -518,7 +552,7 @@ The second model that was developed was an RF
 ```{python}
 # Define the parameter grid for Grid Search
 param_grid = {
-    'n_estimators': [50, 100],
+    'n_estimators': [100,200],
     'max_depth': [10, 20],
     'min_samples_split': [2, 5],
     'min_samples_leaf': [2,4],
@@ -585,6 +619,11 @@ plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.suptitle("Figure ?: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=11)
 plt.show()
+
+TN = conf_df_rf.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP = conf_df_rf.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN = conf_df_rf.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP = conf_df_rf.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
 ```{python}
@@ -611,6 +650,14 @@ plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = -0.05
 plt.show()
 plt.rcParams.update({'font.size': 14})
 
+top_features_rf = importance_df_rf.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
+Feature_1 = top_features_lr[2]
+Feature_2 = top_features_lr[1]
+Feature_3 = top_features_lr[0]
+
+imp_Feature_1 = importance_df_rf[Feature_1].round(3)
+imp_Feature_2 = importance_df_rf[Feature_2].round(3)
+imp_Feature_3 = importance_df_rf[Feature_3].round(3)
 ```
 
 ### **3.3 XGBoost**
@@ -618,8 +665,8 @@ plt.rcParams.update({'font.size': 14})
 ```{python}
 # Define the parameter grid for Grid Search
 param_grid = {
-    'n_estimators': [50, 100, 200],
-    'max_depth': [3, 5, 7],
+    'n_estimators': [100, 200],
+    'max_depth': [10, 20],
     'learning_rate': [0.01, 0.1, 0.2],
     'subsample': [0.8, 0.9, 1.0]
 }
@@ -679,6 +726,11 @@ plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=11)
 plt.show()
+
+TN = conf_df.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP = conf_df.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN = conf_df.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP = conf_df.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
 ```{python}
@@ -702,6 +754,15 @@ plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
+
+top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
+Feature_1 = top_features_lr[2]
+Feature_2 = top_features_lr[1]
+Feature_3 = top_features_lr[0]
+
+imp_Feature_1 = importance_df_xgb[Feature_1].round(3)
+imp_Feature_2 = importance_df_xgb[Feature_2].round(3)
+imp_Feature_3 = importance_df_xgb[Feature_3].round(3)
 ```
 
 ### **3.4 Light Gradient Boosted Machine**
@@ -709,11 +770,11 @@ plt.show()
 ```{python}
 # Define the parameter grid for Grid Search
 param_grid = {
-    'n_estimators': [50, 100],
-    'max_depth': [3, 5],
-    'learning_rate': [0.01, 0.1],
+    'n_estimators': [100, 200],
+    'max_depth': [10, 20],
+    'learning_rate': [0.01, 0.1, 0.2],
     'num_leaves': [20, 31],
-    'subsample': [0.8, 1.0]
+    'subsample': [0.8, 0.9, 1.0]
 }
 
 lgbm_params = {'verbosity': -1}  # Set LightGBM verbosity to -1 (no warnings)
@@ -774,6 +835,11 @@ plt.ylabel("Actual Class")
 plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = -0.05, fontsize=11)
 plt.show()
 
+TN = conf_df_lgbm.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP = conf_df_lgbm.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN = conf_df_lgbm.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP = conf_df_lgbm.iloc[1, 1]  # True Positives (Default correctly classified)
+
 ```
 
 ```{python}
@@ -797,6 +863,15 @@ plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=14, x = 0.5)
 plt.show()
+
+top_features_lgbm = importance_df_lgbm.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
+Feature_1 = top_features_lr[2]
+Feature_2 = top_features_lr[1]
+Feature_3 = top_features_lr[0]
+
+imp_Feature_1 = importance_df_lgbm[Feature_1].round(3)
+imp_Feature_2 = importance_df_lgbm[Feature_2].round(3)
+imp_Feature_3 = importance_df_lgbm[Feature_3].round(3)
 ```
 
 ### **3.5 Model Evaluation and Comparisons**
