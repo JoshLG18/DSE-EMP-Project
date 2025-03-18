@@ -18,7 +18,6 @@ import os
 import sys
 import quarto
 
-
 #Pre-processing
 import pandas as pd
 import numpy as np
@@ -234,7 +233,7 @@ max_PEL_after = loan_data['PersonEmpLength'].max().astype(int)
 
 \input{Tables/summary_table.tex}
 
-Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of `{python} str(max_PA)` and `{python} str(max_PEL)` years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations where *PersonEmpLength* was `{python} str(max_PEL)`  were removed as to not impact the models. For *PersonAge*, all observations with ages above `{python} str(max_PA)` years were removed. This left *PersonAge* with a maximum value of `{python} str(max_PA_after)` and *PersonEmpLength* with a maximum value of `{python} str(max_PEL_after)`, which both are reasonable.
+Table 3 contains all the summary statistics for all variables within the dataset. *PersonAge* and *PersonEmpLength* show maximum values of `{python} str(max_PA)` and `{python} str(max_PEL)` years respectively, which are both above the oldest age a person has lived (122 years), meaning that they are potential errors. To remove these errors from the dataset, both observations where *PersonEmpLength* was `{python} str(max_PEL)` were removed as to not impact the models. For *PersonAge*, all observations with ages above `{python} str(max_PA)` years were removed. This left *PersonAge* with a maximum value of `{python} str(max_PA_after)` and *PersonEmpLength* with a maximum value of `{python} str(max_PEL_after)`, which both are reasonable.
 
 ### **2.3 Distribution Analysis**
 
@@ -261,10 +260,9 @@ for i, col in enumerate(numeric_cols, 1):
 plt.tight_layout()
 plt.figtext(0.5, -0.01, "Figure 1: Histograms of all Numeric Variables", ha="center", fontsize=90)
 plt.show()
-plt.rcParams.update({'font.size': 14})
 ```
 
-The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positivley skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*,  *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
+The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positivley skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*, *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
 
 ```{python}
 #Clearning pt 2
@@ -377,8 +375,6 @@ plt.show()
 LG_vs_LIR = correlation_matrix.loc["LoanIntRate", "LoanGrade"].round(2)
 PA_vs_CH = correlation_matrix.loc["CredHistory", "PersonAge"].round(2)
 
-plt.rcParams.update({'font.size': 14})
-
 # Add a constant term for intercept
 X_train_vif = sm.add_constant(X_train)
 
@@ -412,20 +408,21 @@ with open(file_path, "w") as f:
     f.write(vif_latex)
 ```
 
-Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required. 
+Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required.
 
 \input{Tables/vif_latex.tex}
 
-VIF values for all the variables are shown within Table 4. In contrast to Figure 5, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based and handle multicollinearity well, therefore no futher processing is needed. 
+VIF values for all the variables are shown within Table 4. In contrast to Figure 5, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based and handle multicollinearity well, therefore no futher processing is needed.
 
 Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
 \newpage
+
 ## **3. Results and Discussion**
 
 ### **3.1 Logistic Regression**
 
-The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with. 
+The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with.
 
 ```{python}
 sys.stdout = open(os.devnull, 'w')
@@ -473,13 +470,14 @@ auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 14})
 # Plot ROC Curve for Logistic Regression
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 6))
 plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.figtext(0.5, -0.1, "Figure 6: ROC Curve for Logistic Regression Model", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure 6: ROC Curve for Logistic Regression Model", ha="center", fontsize=9)
 plt.legend()
 plt.show()
 ```
@@ -541,13 +539,13 @@ plt.xlabel('Odds Ratio')
 plt.ylabel('Features')
 plt.figtext(0.5, -0.1, "Figure 8: Odds Ratios for Logistic Regression Model", ha = "center", fontsize=10)
 plt.show()
-plt.rcParams.update({'font.size': 14})
 ```
 
 Figure 8 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)` , respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.
 
 ### **3.2 Random Forest**
-The second model that was developed was an RF  
+
+The second model that was developed and compared with the LR model was an RF as they have been shown to have superior performance than LR models (Couronné et al., 2018). This model was trained on all the standard variables.
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -594,16 +592,20 @@ auc_value_RF = round(auc(fpr_rf, tpr_rf), 3)
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 14})
+
 # Plot ROC Curve for Random Forest
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 6))
 plt.plot(fpr_rf, tpr_rf, color="black", linewidth=2, label=f"AUC: {auc_value_RF}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for Random Forest Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure 9: ROC Curve for Random Forest Model", y = -0.05, fontsize=9)
 plt.legend()
 plt.show()
 ```
+
+The ROC curve, illustrated in Figure 9 for the RF model showcases its improved classification ability in distinguishing between defaulting and non-defaulting cases when compared to LRs. The model achieved a excellent AUC of `{python} str(auc_value_RF)`, indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction.
 
 ```{python}
 plt.rcParams.update({'font.size': 11})
@@ -617,7 +619,7 @@ plt.figure(figsize=(8, 3))
 sns.heatmap(conf_df_rf, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure 10: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=9)
 plt.show()
 
 TN = conf_df_rf.iloc[0, 0]  # True Negatives (No Default correctly classified)
@@ -625,6 +627,8 @@ FP = conf_df_rf.iloc[0, 1]  # False Positives (Non-default misclassified as Defa
 FN = conf_df_rf.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
 TP = conf_df_rf.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
+
+The confusion matrix (Figure 10) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted Non-default for `{python} str(TN)` instances (True Negatives), and correctly identified "Defaulting" for `{python} str(TP)` instances (True Positives). However, there were `{python} str(FP)` False Positives, where the model incorrectly predicted "Defaulting" when the actual class was "No default," and `{python} str(FN)` False Negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.
 
 ```{python}
 # Importance values
@@ -646,21 +650,27 @@ plt.figure(figsize=(8, 3))
 sns.barplot(x='Importance', y='Feature', data=importance_df_rf, palette=sns.color_palette("Greys", n_colors=len(importance_df_rf)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from Random Forest Model", y = -0.05, fontsize=14, x = 0.5)
+plt.suptitle("Figure 11: Feature Importances from Random Forest Model", y = -0.1, fontsize=10, x = 0.5)
 plt.show()
 plt.rcParams.update({'font.size': 14})
 
+#Extract most important features
 top_features_rf = importance_df_rf.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
 Feature_1 = top_features_lr[2]
 Feature_2 = top_features_lr[1]
 Feature_3 = top_features_lr[0]
+Feature_4 = importance_df_rf.iloc[3,0]
 
-imp_Feature_1 = importance_df_rf[Feature_1].round(3)
-imp_Feature_2 = importance_df_rf[Feature_2].round(3)
-imp_Feature_3 = importance_df_rf[Feature_3].round(3)
+imp_Feature_1 = importance_df_rf.iloc[0,1].round(3)
+imp_Feature_2 = importance_df_rf.iloc[1,1].round(3)
+imp_Feature_3 = importance_df_rf.iloc[2,1].round(3)
 ```
 
+Figure 11 demonstrates the most influential features when predicting credit risk by visualising feature importance calculated using mean decrease in accuracy. *`{python} Feature_1`* is the most important feature suggesting that the proportion of income allocated to a loan has the strongest impact on the model’s predictions, supporting the conclusions from the LR which ranked it second. *`{python} Feature_2`* and *`{python} Feature_3`* are also shown to be within the top 3 most important features as they are in the LR model. Contrastly, to the LR, the RF shows *`{python} Feature_4`* to have high importance whereas Figure 8 shows it to have very little impact on credit risk for the LR model, potentially attributed to the differences in model architecture.
+
 ### **3.3 XGBoost**
+
+The third model that I deployed to improve upon the RF model was an XGBoost
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -703,18 +713,22 @@ auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 14})
+
 # Plot ROC Curve for XGBoost
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 6))
 plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_XGB}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = -0.05, fontsize=9)
 plt.legend()
 plt.show()
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 11})
+
 # Convert Confusion Matrix to DataFrame for Visualization
 conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
                        columns=["No Default", "Default"])
@@ -724,7 +738,7 @@ plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=9)
 plt.show()
 
 TN = conf_df.iloc[0, 0]  # True Negatives (No Default correctly classified)
@@ -734,6 +748,7 @@ TP = conf_df.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
 ```{python}
+
 # Extract feature importances
 feature_importances = best_xgb_model.feature_importances_
 features = X_train.columns
@@ -752,7 +767,7 @@ plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=14, x = 0.5)
+plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=10, x = 0.5)
 plt.show()
 
 top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
@@ -760,9 +775,9 @@ Feature_1 = top_features_lr[2]
 Feature_2 = top_features_lr[1]
 Feature_3 = top_features_lr[0]
 
-imp_Feature_1 = importance_df_xgb[Feature_1].round(3)
-imp_Feature_2 = importance_df_xgb[Feature_2].round(3)
-imp_Feature_3 = importance_df_xgb[Feature_3].round(3)
+#imp_Feature_1 = importance_df_xgb[Feature_1].round(3)
+#imp_Feature_2 = importance_df_xgb[Feature_2].round(3)
+#imp_Feature_3 = importance_df_xgb[Feature_3].round(3)
 ```
 
 ### **3.4 Light Gradient Boosted Machine**
@@ -810,19 +825,22 @@ auc_value_LGBM = round(auc(fpr_lgbm, tpr_lgbm), 3)
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 14})
 
 # Plot ROC Curve for LightGBM
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 6))
 plt.plot(fpr_lgbm, tpr_lgbm, color="black", linewidth=2, label=f"AUC: {auc_value_LGBM}")
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = -0.05, fontsize=9)
 plt.legend()
 plt.show()
 ```
 
 ```{python}
+plt.rcParams.update({'font.size': 11})
+
 # Convert Confusion Matrix to DataFrame for Visualization
 conf_df_lgbm = pd.DataFrame(conf_matrix_lgbm, index=["No Default", "Default"],
                             columns=["No Default", "Default"])
@@ -832,7 +850,7 @@ plt.figure(figsize=(8, 5))
 sns.heatmap(conf_df_lgbm, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = -0.05, fontsize=11)
+plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = -0.05, fontsize=9)
 plt.show()
 
 TN = conf_df_lgbm.iloc[0, 0]  # True Negatives (No Default correctly classified)
@@ -843,6 +861,7 @@ TP = conf_df_lgbm.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
 ```{python}
+
 # Extract feature importances
 feature_importances = best_lgbm_model.feature_importances_
 features = X_train.columns
@@ -861,7 +880,7 @@ plt.figure(figsize=(8, 5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_lgbm, palette=sns.color_palette("Greys", n_colors=len(importance_df_lgbm)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=14, x = 0.5)
+plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=10, x = 0.5)
 plt.show()
 
 top_features_lgbm = importance_df_lgbm.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
@@ -869,9 +888,9 @@ Feature_1 = top_features_lr[2]
 Feature_2 = top_features_lr[1]
 Feature_3 = top_features_lr[0]
 
-imp_Feature_1 = importance_df_lgbm[Feature_1].round(3)
-imp_Feature_2 = importance_df_lgbm[Feature_2].round(3)
-imp_Feature_3 = importance_df_lgbm[Feature_3].round(3)
+#imp_Feature_1 = importance_df_lgbm[Feature_1].round(3)
+#imp_Feature_2 = importance_df_lgbm[Feature_2].round(3)
+#imp_Feature_3 = importance_df_lgbm[Feature_3].round(3)
 ```
 
 ### **3.5 Model Evaluation and Comparisons**
@@ -984,7 +1003,6 @@ with open(file_path, "w") as f:
 ```
 
 \input{Tables/top_features_table.tex}
-
 
 ## **4. Conclusion**
 
