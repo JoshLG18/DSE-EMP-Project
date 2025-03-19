@@ -46,7 +46,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
 ```
 
 \newpage
@@ -55,9 +54,9 @@ from lightgbm import LGBMClassifier
 
 Access to credit is a important driver of economic growth, allowing households or businesses to invest, expand and smooth consumption. However, credit risk remains a fundamental challenge for financial institutions, as loan defaulting can lead to substantial financial losses for both the company and stakeholders. The ability to predict these defaults is vital for lending institutions to mitigate their risk and make more informed lending predictions. Recent advancements in machine learning (ML) have aided in the development of robust predictive models that outperform traditional credit-scoring methods (Yang, 2024)
 
-Ensemble methods such as Random Forest (RF), XGBoost, and Light Gradient Boosting Machines (LGBM), have shown significant promise in improving classification accuracy over traditional statistical methods (Yadav, 2025). These models offer enhanced predictive capacity due to their ability to capture non-linear relationships in borrower data, providing financial institutions with more reliable risk assessment (Roy, 2025)
+Ensemble methods such as Random Forest (RF), and XGBoost, have shown significant promise in improving classification accuracy over traditional statistical methods (Yadav, 2025). These models offer enhanced predictive capacity due to their ability to capture non-linear relationships in borrower data, providing financial institutions with more reliable risk assessment (Roy, 2025)
 
-This study aims to explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression (LR), RF, XGBoost and LGBM have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve (AUC). Moreover, exploratory data analysis will be conducted to examine the distribution of important financial variables, identify correlations and allow for optimised feature selection to improve model performance.
+This study aims to explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression (LR), RF, and XGBoost have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve (AUC). Moreover, exploratory data analysis will be conducted to examine the distribution of important financial variables, identify correlations and allow for optimised feature selection to improve model performance.
 
 Due to the increasing reliance on alternative data sources and advanced computational methods in the financial sector, the results of this study may have significant practical implications. Improved credit risk analysis can help lenders reduce default rates, minimise losses and promote more inclusive access to credit (Ellsworth, 2025). By leveraging the latest ML methods, this project aims to contribute to the growing body of research on predictive analytics in finance and support more robust lending practices.
 
@@ -414,7 +413,7 @@ Figure 5 shows a correlation plot quantifying the relationships between the vari
 
 VIF values for all the variables are shown within Table 4. In contrast to Figure 5, *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Due to the other models being tree based and handle multicollinearity well, therefore no futher processing is needed.
 
-Within this analysis, LR, RF, XGboost and LGBM models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
+Within this analysis, LR, RF, XGboost models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
 \newpage
 
@@ -605,7 +604,7 @@ plt.legend()
 plt.show()
 ```
 
-The ROC curve, illustrated in Figure 9 for the RF model showcases its improved classification ability in distinguishing between defaulting and non-defaulting cases when compared to LRs. The model achieved a excellent AUC of `{python} str(auc_value_RF)`, indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction.
+The ROC curve, illustrated in Figure 9 for the RF model showcases its improved classification ability in distinguishing between defaulting and non-defaulting cases and can be compared to LRs. The model achieved a excellent AUC of `{python} str(auc_value_RF)` (Çorbacıoğlu, 2023), indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction, however this highly accurate performance may indicate overfitting.
 
 ```{python}
 plt.rcParams.update({'font.size': 11})
@@ -622,13 +621,13 @@ plt.ylabel("Actual Class")
 plt.suptitle("Figure 10: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=9)
 plt.show()
 
-TN = conf_df_rf.iloc[0, 0]  # True Negatives (No Default correctly classified)
-FP = conf_df_rf.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
-FN = conf_df_rf.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
-TP = conf_df_rf.iloc[1, 1]  # True Positives (Default correctly classified)
+TN_rf = conf_df_rf.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP_rf = conf_df_rf.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN_rf = conf_df_rf.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP_rf = conf_df_rf.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
-The confusion matrix (Figure 10) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted Non-default for `{python} str(TN)` instances (True Negatives), and correctly identified "Defaulting" for `{python} str(TP)` instances (True Positives). However, there were `{python} str(FP)` False Positives, where the model incorrectly predicted "Defaulting" when the actual class was "No default," and `{python} str(FN)` False Negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.
+The confusion matrix (Figure 10) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted Non-default for `{python} str(TN_rf)` instances (True Negatives), and correctly identified "Defaulting" for `{python} str(TP_rf)` instances (True Positives). However, there were `{python} str(FP_rf)` False Positives, where the model incorrectly predicted "Defaulting" when the actual class was "No default," and `{python} str(FN_rf)` False Negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.
 
 ```{python}
 # Importance values
@@ -670,7 +669,8 @@ Figure 11 demonstrates the most influential features when predicting credit risk
 
 ### **3.3 XGBoost**
 
-The third model that I deployed to improve upon the RF model was an XGBoost
+
+The third model that I deployed to improve upon the RF model was an XGBoost as they have been shown to reduce potential overfitting and have higher performance and speed than RFs (GeeksforGeeks, 2024).
 
 ```{python}
 # Define the parameter grid for Grid Search
@@ -681,7 +681,7 @@ param_grid = {
     'subsample': [0.8, 0.9, 1.0]
 }
 
-grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='logloss'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='error'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -721,10 +721,12 @@ plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_X
 plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for XGBoost Model", y = -0.05, fontsize=9)
+plt.suptitle("Figure 12: ROC Curve for XGBoost Model", y = -0.05, fontsize=9)
 plt.legend()
 plt.show()
 ```
+
+Figure 12 visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = `{python} str(auc_value_XGB)), this demonstrates excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; *max_depth* and *min_child_weight*.
 
 ```{python}
 plt.rcParams.update({'font.size': 11})
@@ -734,21 +736,22 @@ conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
                        columns=["No Default", "Default"])
 
 # Plot Confusion Matrix
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 2.5))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=9)
+plt.suptitle("Figure 13: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=9)
 plt.show()
 
-TN = conf_df.iloc[0, 0]  # True Negatives (No Default correctly classified)
-FP = conf_df.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
-FN = conf_df.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
-TP = conf_df.iloc[1, 1]  # True Positives (Default correctly classified)
+TN_xgb = conf_df.iloc[0, 0]  # True Negatives (No Default correctly classified)
+FP_xgb = conf_df.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
+FN_xgb = conf_df.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
+TP_xgb = conf_df.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
-```{python}
+Figure 13 reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts `{python} str(TP_xgb - TP_rf)` true positives more than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, saving potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has `{python} str(FP_xgb - FP_rf)` fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.
 
+```{python}
 # Extract feature importances
 feature_importances = best_xgb_model.feature_importances_
 features = X_train.columns
@@ -763,11 +766,11 @@ importance_df_xgb = pd.DataFrame({
 importance_df_xgb = importance_df_xgb.sort_values(by='Importance', ascending=False)
 
 # Plot the feature importances
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(8, 2.5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from XGBoost Model", y = -0.05, fontsize=10, x = 0.5)
+plt.suptitle("Figure 14: Feature Importances from XGBoost Model", y = -0.05, fontsize=10, x = 0.5)
 plt.show()
 
 top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
@@ -775,131 +778,22 @@ Feature_1 = top_features_lr[2]
 Feature_2 = top_features_lr[1]
 Feature_3 = top_features_lr[0]
 
-#imp_Feature_1 = importance_df_xgb[Feature_1].round(3)
-#imp_Feature_2 = importance_df_xgb[Feature_2].round(3)
-#imp_Feature_3 = importance_df_xgb[Feature_3].round(3)
+imp_Feature_1 = importance_df_xgb.iloc[0,1].round(3)
+imp_Feature_2 = importance_df_xgb.iloc[1,1].round(3)
+imp_Feature_3 = importance_df_xgb.iloc[2,1].round(3)
 ```
 
-### **3.4 Light Gradient Boosted Machine**
+Figure 14 contradicts the other models (LR and RF), as these models predicted *`{python} Feature_1`* to have less of an impact on the preditions than th XGBoost model. However, similar to the RF and LR model, the XGBoost placed high importance on *`{python} Feature_2`* reinforcing the notion that the proportion of income allocated to a loan significantly impacts the risk of defaulting. However, *`{python} Feature_3`* ranks higher than in the RF and LR, indicating that home ownership status may play a larger role in how XGBoosts evaluates credit risk.
 
-```{python}
-# Define the parameter grid for Grid Search
-param_grid = {
-    'n_estimators': [100, 200],
-    'max_depth': [10, 20],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'num_leaves': [20, 31],
-    'subsample': [0.8, 0.9, 1.0]
-}
+\newpage
 
-lgbm_params = {'verbosity': -1}  # Set LightGBM verbosity to -1 (no warnings)
-
-# Initialize Grid Search with Cross-Validation for LGBMClassifier
-grid_search = GridSearchCV(LGBMClassifier(**lgbm_params,random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
-grid_search.fit(X_train, y_train)
-
-# Get the best parameters and best score
-best_params = grid_search.best_params_
-best_score = grid_search.best_score_
-
-# Train the best model
-best_lgbm_model = grid_search.best_estimator_
-best_lgbm_model.fit(X_train, y_train)
-
-# Make Predictions
-lgbm_predictions = best_lgbm_model.predict(X_test)
-lgbm_probabilities = best_lgbm_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
-
-# Compute Confusion Matrix
-conf_matrix_lgbm = confusion_matrix(y_test, lgbm_predictions)
-
-# Compute Performance Metrics
-accuracyLGBM = round(accuracy_score(y_test, lgbm_predictions), 3)
-precisionLGBM = round(precision_score(y_test, lgbm_predictions), 3)
-recallLGBM = round(recall_score(y_test, lgbm_predictions), 3)
-f1_scoreLGBM = round(f1_score(y_test, lgbm_predictions), 3)
-
-# Compute ROC Curve and AUC Score
-fpr_lgbm, tpr_lgbm, _ = roc_curve(y_test, lgbm_probabilities)
-auc_value_LGBM = round(auc(fpr_lgbm, tpr_lgbm), 3)
-```
-
-```{python}
-plt.rcParams.update({'font.size': 14})
-
-# Plot ROC Curve for LightGBM
-plt.figure(figsize=(8, 6))
-plt.plot(fpr_lgbm, tpr_lgbm, color="black", linewidth=2, label=f"AUC: {auc_value_LGBM}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
-plt.xlabel("False Positive Rate (1 - Specificity)")
-plt.ylabel("True Positive Rate (Sensitivity)")
-plt.suptitle("Figure ?: ROC Curve for LightGBM Model", y = -0.05, fontsize=9)
-plt.legend()
-plt.show()
-```
-
-```{python}
-plt.rcParams.update({'font.size': 11})
-
-# Convert Confusion Matrix to DataFrame for Visualization
-conf_df_lgbm = pd.DataFrame(conf_matrix_lgbm, index=["No Default", "Default"],
-                            columns=["No Default", "Default"])
-
-# Plot Confusion Matrix for LightGBM
-plt.figure(figsize=(8, 5))
-sns.heatmap(conf_df_lgbm, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
-plt.xlabel("Predicted Class")
-plt.ylabel("Actual Class")
-plt.suptitle("Figure ?: Confusion Matrix for LightGBM Model", y = -0.05, fontsize=9)
-plt.show()
-
-TN = conf_df_lgbm.iloc[0, 0]  # True Negatives (No Default correctly classified)
-FP = conf_df_lgbm.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
-FN = conf_df_lgbm.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
-TP = conf_df_lgbm.iloc[1, 1]  # True Positives (Default correctly classified)
-
-```
-
-```{python}
-
-# Extract feature importances
-feature_importances = best_lgbm_model.feature_importances_
-features = X_train.columns
-
-# Create a DataFrame for plotting
-importance_df_lgbm = pd.DataFrame({
-    'Feature': features,
-    'Importance': feature_importances
-})
-
-# Sort the DataFrame by importance values
-importance_df_lgbm = importance_df_lgbm.sort_values(by='Importance', ascending=False)
-
-# Plot the feature importances in black and white with black outlines
-plt.figure(figsize=(8, 5))
-sns.barplot(x='Importance', y='Feature', data=importance_df_lgbm, palette=sns.color_palette("Greys", n_colors=len(importance_df_lgbm)), edgecolor='black')
-plt.xlabel('Importance')
-plt.ylabel('Feature')
-plt.suptitle("Figure ?: Feature Importances from LightGBM Model", y = -0.05, fontsize=10, x = 0.5)
-plt.show()
-
-top_features_lgbm = importance_df_lgbm.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
-Feature_1 = top_features_lr[2]
-Feature_2 = top_features_lr[1]
-Feature_3 = top_features_lr[0]
-
-#imp_Feature_1 = importance_df_lgbm[Feature_1].round(3)
-#imp_Feature_2 = importance_df_lgbm[Feature_2].round(3)
-#imp_Feature_3 = importance_df_lgbm[Feature_3].round(3)
-```
-
-### **3.5 Model Evaluation and Comparisons**
+### **3.4 Model Evaluation and Comparisons**
 
 ```{python}
 # Create Accuracy DataFrame
 accuracy_df = pd.DataFrame({
-    "Model": ["LR","RF", "XGB", "LGBM"],
-    "Value": [accuracyLR,accuracyRF, accuracyXGB, accuracyLGBM]
+    "Model": ["LR","RF", "XGB"],
+    "Value": [accuracyLR,accuracyRF, accuracyXGB]
 })
 
 # Create Bar Plot for Accuracy
@@ -910,7 +804,7 @@ for index, row in accuracy_df.iterrows():
 plt.ylim(0, 1)
 plt.xlabel("Model")
 plt.ylabel("Accuracy")
-plt.figtext(0.5, -0.1, "Figure ?: Accuracy for Each Model", ha="center", fontsize=11)
+plt.figtext(0.5, -0.1, "Figure 15: Accuracy for Each Model", ha="center", fontsize=11)
 plt.show()
 
 ```
@@ -920,24 +814,22 @@ plt.show()
 log_loss_LR = log_loss(y_test, lr_predictions)
 log_loss_RF = log_loss(y_test, rf_predictions)
 log_loss_XGB = log_loss(y_test, xgb_predictions)
-log_loss_LGBM = log_loss(y_test, lgbm_predictions)
 
 # Brier Scores
 brier_LR = brier_score_loss(y_test, lr_predictions)
 brier_RF = brier_score_loss(y_test, rf_predictions)
 brier_XGB = brier_score_loss(y_test, xgb_predictions)
-brier_LGBM = brier_score_loss(y_test, lgbm_predictions)
 
 # Create a DataFrame for Performance Metrics
 performance_df = pd.DataFrame({
-    "Model": ["LR","RF", "XGB", "LGBM"],
-    "Accuracy": [accuracyLR,accuracyRF, accuracyXGB, accuracyLGBM],
-    "Precision": [precisionLR,precisionRF, precisionXGB, precisionLGBM],
-    "Recall": [recallLR,recallRF, recallXGB, recallLGBM],
-    "F1 Score": [f1_scoreLR,f1_scoreRF, f1_scoreXGB, f1_scoreLGBM],
-    "AUC": [auc_value_LR,auc_value_RF, auc_value_XGB, auc_value_LGBM],
-    "Log Loss": [log_loss_LR,log_loss_RF, log_loss_XGB, log_loss_LGBM],
-    "Brier Score": [brier_LR,brier_RF, brier_XGB, brier_LGBM]
+    "Model": ["LR","RF", "XGB"],
+    "Accuracy": [accuracyLR,accuracyRF, accuracyXGB],
+    "Precision": [precisionLR,precisionRF, precisionXGB],
+    "Sensitivity": [recallLR,recallRF, recallXGB],
+    "F1 Score": [f1_scoreLR,f1_scoreRF, f1_scoreXGB],
+    "AUC": [auc_value_LR,auc_value_RF, auc_value_XGB],
+    "Log Loss": [log_loss_LR,log_loss_RF, log_loss_XGB],
+    "Brier Score": [brier_LR,brier_RF, brier_XGB]
 })
 
 # Round values for better readability and format as strings for LaTeX output
@@ -967,20 +859,24 @@ with open(file_path, "w") as f:
 
 \input{Tables/performance_latex.tex}
 
+Figure 15 compares model accuracy, showing that XGBoost (`{python} str(accuracyXGB)`) performs best, followed closely by the RF (`{python} str(accuracyRF)`), while LR lags behind at `{python} str(accuracyLR)`. This highlights the superior performance of ensemble models over LR in classification tasks.
+
+Table 5 provides a more detailed breakdown, confirming XGBoost as the strongest model, with the highest AUC (`{python} str(auc_value_XGB)`), recall (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF (AUC = `{python} str(auc_value_RF)`, F1 = `{python} str(f1_scoreRF)`) follow closely, both offering strong predictive performance. LR underperforms across all metrics, with the lowest AUC (`{python} str(auc_value_LR)`) and the highest log loss (`{python} str(log_loss_LR)`), indicating weaker reliability.
+
+The lower log loss and Brier scores for XGBoost reflect better probability calibration, while LR’s higher values suggest less confidence in predictions. Overall, XGBoost provide the best balance of accuracy, precision, and reliability, making them the most effective models in this comparison.
+
 ```{python}
 # Extract top 3 features for each model
 top_features_lr = conf.index[-3:].tolist()  # Logistic Regression (based on Odds Ratios)
 top_features_rf = importance_df_rf.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
 top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # XGBoost
-top_features_lgbm = importance_df_lgbm.nlargest(3, 'Importance')['Feature'].tolist()  # LightGBM
 
 # Create a DataFrame for top features
 top_features_df = pd.DataFrame({
     "Logistic Regression": top_features_lr,
     "Random Forest": top_features_rf,
-    "XGBoost": top_features_xgb,
-    "LightGBM": top_features_lgbm
-}, index=["Feature 1", "Feature 2", "Feature 3"])  # Rename row labels
+    "XGBoost": top_features_xgb
+    }, index=["Feature 1", "Feature 2", "Feature 3"])  # Rename row labels
 
 # Convert the DataFrame to LaTeX format
 top_features_latex = top_features_df.to_latex(
@@ -1004,6 +900,19 @@ with open(file_path, "w") as f:
 
 \input{Tables/top_features_table.tex}
 
-## **4. Conclusion**
+Table 6 summarises the key predictors of default for each model. LR relies on *PersonIncome*, *LoanPercentIncome*, and *LoanIntRate*, suggesting a linear relationship between income, loan percentage, and default risk. RF prioritises *LoanPercentIncome* and *PersonIncome*, indicating the importance of relative loan burden, while also recognising *LoanIntRate*. XGBoost identifies *LoanGrade* as the most influential feature, followed by *PersonHomeOwnership* and *LoanPercentIncome*, reflecting a broader assessment of creditworthiness. The differences suggest that tree-based models (RF, XGBoost) capture non-linear relationships better than LR, which is constrained to linear associations.
+
+### **3.5 Practical Implications and Limiations**
+
+The findings demonstrate the effectiveness of ensemble learning models, particularly XGBoost and RF, in improving credit risk assessment. These models outperform traditional approaches by capturing complex patterns in financial data and handling imbalanced datasets more effectively (Chopra & Bhilare, 2018). By focusing on key predictors such as LoanGrade, LoanPercentIncome, and PersonIncome, lenders can refine their risk assessment frameworks, improving accuracy while minimising misclassification errors. This enables better-informed lending decisions, reducing default rates and enhancing overall portfolio performance.
+
+Despite their advantages, ensemble models present several challenges. Their complexity reduces interpretability, which is a key consideration in regulated industries where transparency is required (Afolabi, 2024). These models also require higher computational resources, increasing costs and making them less accessible to smaller institutions (Lei, 2025). Furthermore, ensemble methods are prone to overfitting when applied to imbalanced datasets, limiting their generalisability without proper tuning (Cheng et al., 2021). Another concern is the potential amplification of biases present in training data, which could lead to ethical issues in credit decision-making (Shah & Davis, 2025). Addressing these limitations requires further research into explainable AI, optimised model tuning, and bias mitigation strategies to ensure fair and reliable predictions.
+
+## **5. Conclusion**
+This study compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (`{python} str(accuracyXGB)`) and AUC (`{python} str(auc_value_XGB)`), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.
+
+Feature importance analysis revealed key differences in how these models assess risk. LR prioritised income-based factors, whereas RF and XGB incorporated broader indicators such as LoanGrade and PersonHomeOwnership. This suggests that ensemble methods offer a more nuanced and holistic approach to credit risk assessment, moving beyond simple financial metrics.
+
+Despite their strengths, XGB and RF come with limitations. Their complexity makes them harder to interpret, which could be a barrier in regulated financial environments. They also require careful tuning to avoid overfitting, meaning their performance depends heavily on parameter selection. Future work should focus on improving explainability, reducing bias in training data, and optimising hyperparameters to further refine predictive performance.
 
 [Link to Github Repository = BEE2041 Data Science In Economics Empirical Project](https://github.com/JoshLG18/DSE-EMP-Project)

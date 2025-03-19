@@ -14,7 +14,6 @@ The libraries used in this project are:
 - sklearn 1.6.1
 - scipy 1.15.2
 - xgboost 2.1.4
-- lightgbm 4.6.0
 - statsmodels 0.14.4
 
 ## Files
