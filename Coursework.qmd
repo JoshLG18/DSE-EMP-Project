@@ -26,24 +26,17 @@ import seaborn as sns
 import matplotlib.patches as mpatches
 
 from sklearn.metrics import (
-    confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc
+    confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_curve, auc, brier_score_loss, log_loss, precision_recall_curve
 )
-from sklearn.preprocessing import label_binarize
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import label_binarize, LabelEncoder, QuantileTransformer
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
-from sklearn.svm import SVC
 import statsmodels.api as sm
 from sklearn.utils import resample
-from sklearn.metrics import log_loss
-from sklearn.metrics import brier_score_loss
-from sklearn.metrics import precision_recall_curve, roc_curve, f1_score
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-from sklearn.preprocessing import QuantileTransformer
 
 # ML Models
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 ```
@@ -549,15 +542,15 @@ The second model that was developed and compared with the LR model was an RF as 
 ```{python}
 # Define the parameter grid for Grid Search
 param_grid = {
-    'n_estimators': [100,200],
+    'n_estimators': [100,200,500],
     'max_depth': [10, 20],
-    'min_samples_split': [2, 5],
+    'min_samples_split': [2, 5,10],
     'min_samples_leaf': [2,4],
     'bootstrap': [True, False]
 }
 
 # Define Stratified K-Fold
-stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+stratified_kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 # Initialize Grid Search with Cross-Validation
 grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
@@ -677,11 +670,15 @@ The third model that I deployed to improve upon the RF model was an XGBoost as t
 param_grid = {
     'n_estimators': [100, 200],
     'max_depth': [10, 20],
-    'learning_rate': [0.01, 0.1, 0.2],
-    'subsample': [0.8, 0.9, 1.0]
+    'learning_rate': [0.001,0.01, 0.1],
+    'subsample': [0.8, 1.0],
+    'colsample_bytree': [0.8, 1.0],
+    'min_child_weight': [1, 5, 10],  # Minimum sum of instance weight (hessian) in a child
+    'reg_alpha': [0, 0.1, 0.5],  # L1 regularization (feature selection)
+    'reg_lambda': [0.5, 1, 2]  # L2 regularization (weight shrinkage)
 }
 
-grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='error'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='auc'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -696,7 +693,6 @@ best_xgb_model.fit(X_train, y_train)
 xgb_predictions = best_xgb_model.predict(X_test)
 xgb_probabilities = best_xgb_model.predict_proba(X_test)[:, 1]  # Extract probability for positive class
 
-
 # Compute Confusion Matrix
 conf_matrix_xgb = confusion_matrix(y_test, xgb_predictions)
 
@@ -709,7 +705,6 @@ f1_scoreXGB = round(f1_score(y_test, xgb_predictions), 3)
 # Compute ROC Curve and AUC Score
 fpr_xgb, tpr_xgb, _ = roc_curve(y_test, xgb_probabilities)
 auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
-
 ```
 
 ```{python}
@@ -726,7 +721,7 @@ plt.legend()
 plt.show()
 ```
 
-Figure 12 visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = `{python} str(auc_value_XGB)), this demonstrates excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; *max_depth* and *min_child_weight*.
+Figure 12 visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = `{python} str(auc_value_XGB)`), this demonstrates excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; *max_depth* and *min_child_weight*.
 
 ```{python}
 plt.rcParams.update({'font.size': 11})
@@ -740,7 +735,7 @@ plt.figure(figsize=(8, 2.5))
 sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
-plt.suptitle("Figure 13: Confusion Matrix for XGBoost Model", y = -0.05, fontsize=9)
+plt.suptitle("Figure 13: Confusion Matrix for XGBoost Model", y = -0.1, fontsize=9)
 plt.show()
 
 TN_xgb = conf_df.iloc[0, 0]  # True Negatives (No Default correctly classified)
@@ -749,7 +744,7 @@ FN_xgb = conf_df.iloc[1, 0]  # False Negatives (Default misclassified as Non-def
 TP_xgb = conf_df.iloc[1, 1]  # True Positives (Default correctly classified)
 ```
 
-Figure 13 reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts `{python} str(TP_xgb - TP_rf)` true positives more than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, saving potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has `{python} str(FP_xgb - FP_rf)` fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.
+Figure 13 reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts `{python} str(TP_xgb - TP_rf)` more true positives than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, avoiding potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has `{python} str(FP_xgb - FP_rf)` fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.
 
 ```{python}
 # Extract feature importances
@@ -770,7 +765,7 @@ plt.figure(figsize=(8, 2.5))
 sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
-plt.suptitle("Figure 14: Feature Importances from XGBoost Model", y = -0.05, fontsize=10, x = 0.5)
+plt.suptitle("Figure 14: Feature Importances from XGBoost Model", y = -0.1, fontsize=10, x = 0.5)
 plt.show()
 
 top_features_xgb = importance_df_xgb.nlargest(3, 'Importance')['Feature'].tolist()  # Random Forest
@@ -811,14 +806,14 @@ plt.show()
 
 ```{python}
 # Log Loss
-log_loss_LR = log_loss(y_test, lr_predictions)
-log_loss_RF = log_loss(y_test, rf_predictions)
-log_loss_XGB = log_loss(y_test, xgb_predictions)
+log_loss_LR = round(log_loss(y_test, lr_predictions), 3)
+log_loss_RF = round(log_loss(y_test, rf_predictions), 3)
+log_loss_XGB = round(log_loss(y_test, xgb_predictions), 3)
 
 # Brier Scores
-brier_LR = brier_score_loss(y_test, lr_predictions)
-brier_RF = brier_score_loss(y_test, rf_predictions)
-brier_XGB = brier_score_loss(y_test, xgb_predictions)
+brier_LR = round(brier_score_loss(y_test, lr_predictions),3)
+brier_RF = round(brier_score_loss(y_test, rf_predictions),3)
+brier_XGB = round(brier_score_loss(y_test, xgb_predictions),3)
 
 # Create a DataFrame for Performance Metrics
 performance_df = pd.DataFrame({
@@ -908,10 +903,12 @@ The findings demonstrate the effectiveness of ensemble learning models, particul
 
 Despite their advantages, ensemble models present several challenges. Their complexity reduces interpretability, which is a key consideration in regulated industries where transparency is required (Afolabi, 2024). These models also require higher computational resources, increasing costs and making them less accessible to smaller institutions (Lei, 2025). Furthermore, ensemble methods are prone to overfitting when applied to imbalanced datasets, limiting their generalisability without proper tuning (Cheng et al., 2021). Another concern is the potential amplification of biases present in training data, which could lead to ethical issues in credit decision-making (Shah & Davis, 2025). Addressing these limitations requires further research into explainable AI, optimised model tuning, and bias mitigation strategies to ensure fair and reliable predictions.
 
-## **5. Conclusion**
-This study compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (`{python} str(accuracyXGB)`) and AUC (`{python} str(auc_value_XGB)`), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.
+\newpage
 
-Feature importance analysis revealed key differences in how these models assess risk. LR prioritised income-based factors, whereas RF and XGB incorporated broader indicators such as LoanGrade and PersonHomeOwnership. This suggests that ensemble methods offer a more nuanced and holistic approach to credit risk assessment, moving beyond simple financial metrics.
+## **4. Conclusion**
+This project compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (`{python} str(accuracyXGB)`) and AUC (`{python} str(auc_value_XGB)`), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters, leading to financial losses. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.
+
+Feature importance analysis revealed key differences in how these models assess risk. LR prioritised income-based factors, whereas RF and XGB incorporated broader indicators such as *LoanGrade* and *PersonHomeOwnership*. This suggests that ensemble methods offer a more nuanced and holistic approach to credit risk assessment, moving beyond simple financial metrics.
 
 Despite their strengths, XGB and RF come with limitations. Their complexity makes them harder to interpret, which could be a barrier in regulated financial environments. They also require careful tuning to avoid overfitting, meaning their performance depends heavily on parameter selection. Future work should focus on improving explainability, reducing bias in training data, and optimising hyperparameters to further refine predictive performance.
 
