@@ -1,4 +1,4 @@
-# Empirical Project - BEE 2041 Data Science in Economics
+# Empirical Project - BEE2041 Data Science in Economics
 
 ## Overview
 This project is my final project of BEE2041 Data Science in Economics. In this project I explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression, Random Forest, and Extreme Gradient Boosting have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve.
