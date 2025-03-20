@@ -1,7 +1,7 @@
 # Empirical Project - BEE 2041 Data Science in Economics
 
 ## Overview
-This project is my final project of BEE2041 Data Science in Economics. In this project I explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression (LR), RF, XGBoost and LGBM have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve (AUC).
+This project is my final project of BEE2041 Data Science in Economics. In this project I explore a data-driven approach to credit risk analysis by using ML methods to predict loan defaulting. Logistic regression, Random Forest, and Extreme Gradient Boosting have all been implemented and compared using standard performance metrics such as accuracy, precision, recall, F1-score and area under the curve.
 
 ## Requirements
 - Python Version = 3.13.2
@@ -25,4 +25,4 @@ The libraries used in this project are:
 - Tables/ contains the tables generated in the project.
 
 ## How to reproduce the results
-- To reproduce the results, you can run the code in Coursework.qmd in a Jupyter notebook or any other markdown editor.
+- To reproduce the results, you can run the code within the project using the command 'make' within the terminal.
