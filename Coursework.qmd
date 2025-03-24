@@ -114,6 +114,8 @@ loan_data['LoanGrade'] = loan_data['LoanGrade'].astype('category')
 
     # Label encode the LoanGrade column
 label_encoder = LabelEncoder()
+original_label_encoder = label_encoder
+
 loan_data['LoanGrade'] = label_encoder.fit_transform(loan_data['LoanGrade'])
 
 # Separate train (non-missing LoanIntRate) and test (missing LoanIntRate)
@@ -284,6 +286,7 @@ numeric_cols = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLe
 
 # Apply Quantile Transformation = due to skewness of the data
 scaler = QuantileTransformer(output_distribution='normal')
+original_scaler = scaler
 
 # Transform the numeric columns and ensure the DataFrame structure is maintained
 loan_data[numeric_cols] = pd.DataFrame(scaler.fit_transform(loan_data[numeric_cols]), 
@@ -898,9 +901,55 @@ Table 6 summarises the key predictors of default for each model. LR relies on *P
 
 ### **3.5 Practical Implications and Limiations**
 
-The findings demonstrate the effectiveness of ensemble learning models, particularly XGBoost and RF, in improving credit risk assessment. These models outperform traditional approaches by capturing complex patterns in financial data and handling imbalanced datasets more effectively (Chopra & Bhilare, 2018). By focusing on key predictors such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome*, lenders can refine their risk assessment frameworks, improving accuracy while minimising misclassification errors. This enables better-informed lending decisions, reducing default rates and enhancing overall portfolio performance.
+The findings demonstrate the effectiveness of ensemble learning models, particularly XGBoost and RF, in improving credit risk assessment. These models outperform traditional approaches by capturing complex patterns in financial data and handling imbalanced datasets more effectively (Chopra & Bhilare, 2018). By focusing on key predictors such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome*, lenders can refine their risk assessment frameworks, improving accuracy while minimising misclassification errors. This enables better-informed lending decisions, reducing default rates and enhancing overall portfolio performance. 
 
-Despite their advantages, ensemble models present several challenges. Their complexity reduces interpretability, which is a key consideration in regulated industries where transparency is required (Afolabi, 2024). These models also require higher computational resources, increasing costs and making them less accessible to smaller institutions (Lei, 2025). Furthermore, ensemble methods are prone to overfitting when applied to imbalanced datasets, limiting their generalisability without proper tuning (Cheng et al., 2021). Another concern is the potential amplification of biases present in training data, which could lead to ethical issues in credit decision-making (Shah & Davis, 2025). Addressing these limitations requires further research into explainable AI, optimised model tuning, and bias mitigation strategies to ensure fair and reliable predictions.
+Despite their advantages, ensemble models present several challenges. Their complexity reduces interpretability, which is a key consideration in regulated industries where transparency is required (Afolabi, 2024), indicating that local interpretable model-agnostic explainations could be implemented. Figure 16....
+
+```{python}
+#LIME...
+import lime
+import lime.lime_tabular
+
+# Reverse scaling function
+def reverse_scaling(scaled_data, scaler, columns):
+    return pd.DataFrame(scaler.inverse_transform(scaled_data), columns=columns)
+
+# Reverse label encoding function
+def reverse_label_encoding(encoded_data, label_encoder):
+    return label_encoder.inverse_transform(encoded_data.astype(int))
+
+# Reverse scaling and label encoding for the entire test set
+original_data_test = reverse_scaling(X_test, original_scaler, numeric_cols)
+original_data_test['LoanGrade'] = reverse_label_encoding(original_data_test['LoanGrade'], original_label_encoder)
+
+# Create LIME explainer
+explainer = lime.lime_tabular.LimeTabularExplainer(
+    X_train.values,
+    feature_names=X_train.columns,
+    class_names=['No Default', 'Default'],
+    discretize_continuous=True,
+    random_state=42
+)
+
+# Randomly select a defaulting observation
+defaulting_indices = original_data_test[y_test == 1].index
+random_index = np.random.choice(defaulting_indices)
+instance_to_explain = original_data_test.loc[random_index].values
+
+# Explain the instance using LIME
+exp = explainer.explain_instance(instance_to_explain, best_xgb_model.predict_proba, num_features=10)
+
+# Save the explanation as a PNG file
+exp.save_to_file('Tables/lime_explanation.html')
+exp.as_pyplot_figure().savefig('Tables/lime_explanation.png')
+```
+
+![Figure 16: LIME Explanation for a Defaulting Observation](Tables/lime_explanation.png)
+
+write about LIME...
+
+Ensemble models also require higher computational resources, increasing costs and making them less accessible to smaller institutions (Lei, 2025). Furthermore, ensemble methods are prone to overfitting when applied to imbalanced datasets, limiting their generalisability without proper tuning (Cheng et al., 2021). Another concern is the potential amplification of biases present in training data, which could lead to ethical issues in credit decision-making (Shah & Davis, 2025). Addressing these limitations requires further research into explainable AI, optimised model tuning, and bias mitigation strategies to ensure fair and reliable predictions.
+
 
 \newpage
 
