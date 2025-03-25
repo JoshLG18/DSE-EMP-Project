@@ -20,16 +20,15 @@ The libraries used in this project are:
 
 ├── Makefile                 # Code to reproduce results (render project)
 ├── README.md                # You are here!
+├── Blog.txt                 # Text file contianing github link and blog post link
 ├── Project/                 # All main project content
 │   ├── Blog.qmd             # Quarto source file
 |   |── _quarto.yml          # Quarto configuration file
 |   |── .gitignore           # Files to be ignored by git
-|   |── docs/                # Rendered project files
-|   |   └──Blog.html         # Rendered project file
-|   |   └── Blog.pdf         # Rendered project file
+|   |── Outputs/             # Rendered project files
+|   |   └── Blog.html         # Rendered project html
+|   |   └── Blog.pdf         # Rendered project pdf
 │   |   └── Blog_files/      # Auto-generated assets for Blog.html
-|   |   └── search.json      # Search index for Blog.html
-|   |   └── _site.yml        # Site configuration file
 │   ├── Data/                # Raw data
 │   │   └── credit_risk_dataset.csv
 │   ├── Tables/              # Auto-generated LaTeX tables

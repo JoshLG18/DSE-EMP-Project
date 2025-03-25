@@ -1,21 +1,15 @@
 project:
-  type: website
-  output-dir: docs  # GitHub Pages expects this
+  output-dir: Outputs
 
 format:
   html:
     toc: true
-    number-sections: true
+    number-sections: false
   pdf:
     toc: true
-    number-sections: true
+    number-sections: false
     include-in-header:
       - text: \usepackage{float}
-
-website:
-  title: "Empirical Project"
-  page-navigation: true
-  navbar: false
 
 execute:
   echo: false

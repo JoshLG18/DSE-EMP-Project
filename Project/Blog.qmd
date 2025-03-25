@@ -3,7 +3,7 @@ title: "Predicting Loan Defaults: A Data-Driven Approach to Credit Risk Analysis
 author: "Student Number – 720017170"
 subtitle: "BEE2041 Data Science in Economics – Empirical Project"
 
-output-file: index  
+output-file: Blog  
 
 execute:
   echo: false
@@ -318,7 +318,7 @@ causal_data = loan_data.copy()
 plt.rcParams.update({'font.size': 9})
 plt.figure(figsize=(8, 2.5))
 loan_data.boxplot()
-plt.figtext(0.5, -0.3, "Figure 2: Box Plots of All Variables Before Normalisation", ha="center", fontsize=9)
+plt.figtext(0.5, -0.4, "Figure 2: Box Plots of All Variables Before Normalisation", ha="center", fontsize=9)
 plt.xticks(rotation=45)
 plt.show()
 ```
@@ -339,7 +339,7 @@ loan_data[numeric_cols] = pd.DataFrame(scaler.fit_transform(loan_data[numeric_co
 # Box plots for all numeric variables post normalisation
 plt.figure(figsize=(8,2.5))
 loan_data.boxplot()
-plt.figtext(0.5, -0.3, "Figure 3: Box Plots of All Variables After Normalisation", ha="center", fontsize=9)
+plt.figtext(0.5, -0.4, "Figure 3: Box Plots of All Variables After Normalisation", ha="center", fontsize=9)
 plt.xticks(rotation=45)
 plt.show()
 ```

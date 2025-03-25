@@ -1,5 +1,5 @@
 QUARTO = quarto
-QPROJECT = Project  # your Quarto project folder
+QPROJECT = Project
 
 all: render
 
@@ -7,10 +7,7 @@ render:
 	$(QUARTO) render $(QPROJECT) 
 
 open:
-	open $(QPROJECT)/docs/index.html
-
-clean:
-	rm -rf $(QPROJECT)/docs/
+	open $(QPROJECT)/Outputs/Blog.html
 
 .PHONY: all render open clean
 
