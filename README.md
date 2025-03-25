@@ -24,9 +24,10 @@ The libraries used in this project are:
 ├── Project/                 # All main project content
 │   ├── Blog.qmd             # Quarto source file
 |   |── _quarto.yml          # Quarto configuration file
+|   |── _publish.yml         # Publishing configuration file
 |   |── .gitignore           # Files to be ignored by git
 |   |── Outputs/             # Rendered project files
-|   |   └── Blog.html         # Rendered project html
+|   |   └── Blog.html        # Rendered project html
 |   |   └── Blog.pdf         # Rendered project pdf
 │   |   └── Blog_files/      # Auto-generated assets for Blog.html
 │   ├── Data/                # Raw data
