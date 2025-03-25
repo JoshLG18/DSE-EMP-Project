@@ -904,7 +904,7 @@ accuracy_df = pd.DataFrame({
 
 # Create Bar Plot for Accuracy
 plt.figure(figsize=(9, 3))
-sns.barplot(x="Model", y="Value", data=accuracy_df, palette="gray", edgecolor="black")
+sns.barplot(x="Model", y="Value", data=accuracy_df, palette="Blues", edgecolor="black")
 for index, row in accuracy_df.iterrows():
     plt.text(index, row.Value + 0.02, round(row.Value, 3), ha="center", fontsize=10)
 plt.ylim(0, 1)

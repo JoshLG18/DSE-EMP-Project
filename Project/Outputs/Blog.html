@@ -109,7 +109,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="data"><strong>2. Data</strong></h2>
 <p>Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of 12 variables/columns and 32580 observations, illustrated in Table 1.</p>
 <div class="cell" data-execution_count="5">
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="73">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 1 - Variable Information</caption>
 <thead>
@@ -187,7 +187,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="preparing-the-data" class="level3">
 <h3 class="anchored" data-anchor-id="preparing-the-data"><strong>2.1 Preparing the Data</strong></h3>
 <div class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="74">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 2 -Missing Values for Each Variable</caption>
 <thead>
@@ -254,7 +254,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="descriptive-statistics" class="level3">
 <h3 class="anchored" data-anchor-id="descriptive-statistics"><strong>2.2 Descriptive Statistics</strong></h3>
 <div class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div class="cell-output cell-output-display" data-execution_count="76">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 3 -Summary Statistics for Each Variable</caption>
 <thead>
@@ -358,7 +358,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="distribution-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="distribution-analysis"><strong>2.3 Distribution Analysis</strong></h3>
-<div id="ae1fbe69" class="cell" data-execution_count="9">
+<div id="da2561f4" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -368,7 +368,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positivley skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. <em>PersonAge</em>, <em>PersonEmpLength</em> and <em>CredLength</em> have very similar distributions, indicating potential correlation between these variables.</p>
-<div id="99cfb34a" class="cell" data-execution_count="11">
+<div id="473e5577" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -378,7 +378,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>Figure 2 shows that the data isn’t scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 3. The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in <em>PersonIncome</em> is due to people earning considerably more than average.</p>
-<div id="81e72eb7" class="cell" data-execution_count="12">
+<div id="c469f598" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -387,7 +387,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<div id="38b48ae3" class="cell" data-execution_count="14">
+<div id="25e42fdb" class="cell" data-execution_count="14">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -400,7 +400,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="correlation-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="correlation-analysis"><strong>2.4 Correlation Analysis</strong></h3>
-<div id="c38442a9" class="cell" data-execution_count="16">
+<div id="1918411c" class="cell" data-execution_count="16">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -411,7 +411,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>Figure 5 shows a correlation plot quantifying the relationships between the variables and to the target <em>LoanStatus</em>. <em>LoanGrade</em> and <em>LoanIntRate</em> have a high correlation coefficient (0.96), indicating that they are highly correlated. Also, a similar relationship is shown between <em>PersonAge</em> and <em>CredHistory</em> (r = 0.8). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required.</p>
 <div class="cell" data-execution_count="17">
-<div class="cell-output cell-output-display" data-execution_count="17">
+<div class="cell-output cell-output-display" data-execution_count="85">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 4 -Variance Inflation Factor (VIF) Values</caption>
 <thead>
@@ -423,15 +423,15 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td>PersonAge</td>
-<td>1.501</td>
+<td>1.492</td>
 </tr>
 <tr class="even">
 <td>PersonIncome</td>
-<td>9.368</td>
+<td>9.491</td>
 </tr>
 <tr class="odd">
 <td>PersonHomeOwnership</td>
-<td>1.199</td>
+<td>1.198</td>
 </tr>
 <tr class="even">
 <td>PersonEmpLength</td>
@@ -443,19 +443,19 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td>LoanGrade</td>
-<td>2.972</td>
+<td>2.975</td>
 </tr>
 <tr class="odd">
 <td>LoanAmnt</td>
-<td>12.519</td>
+<td>12.721</td>
 </tr>
 <tr class="even">
 <td>LoanIntRate</td>
-<td>3.09</td>
+<td>3.095</td>
 </tr>
 <tr class="odd">
 <td>LoanPercentIncome</td>
-<td>12.02</td>
+<td>12.212</td>
 </tr>
 <tr class="even">
 <td>PreviousDefault</td>
@@ -463,7 +463,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="odd">
 <td>CredHistory</td>
-<td>1.469</td>
+<td>1.46</td>
 </tr>
 </tbody>
 </table>
@@ -475,7 +475,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="causal-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="causal-analysis"><strong>2.5 Causal Analysis</strong></h3>
 <p>This section explores the heterogeneous impact of previous loan default on the likelihood of defaulting again, using a causal forest framework. By estimating Conditional Average Treatment Effects (CATEs), we can uncover how the effect of prior default varies across individual borrower profiles</p>
-<div id="3645fa02" class="cell" data-execution_count="18">
+<div id="1d8d64d0" class="cell" data-execution_count="18">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -492,7 +492,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="logistic-regression" class="level3">
 <h3 class="anchored" data-anchor-id="logistic-regression"><strong>3.1 Logistic Regression</strong></h3>
 <p>The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with.</p>
-<div id="dd612f35" class="cell" data-execution_count="20">
+<div id="f4d8d650" class="cell" data-execution_count="20">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -502,7 +502,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>Figure 7 shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved a AUC score of 0.833 which is considered considerable (Çorbacıoğlu, 2023), indicating solid predictive performance when distinguishing between positive outcomes. The model’s curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to true positive rate (TPR) remaining below 0.9.</p>
-<div id="0445f919" class="cell" data-execution_count="21">
+<div id="682a419f" class="cell" data-execution_count="21">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -511,8 +511,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Figure 8 visualises the error within the classification model. The matrix reveals that the model correctly identified 1085 non-default cases (true negatives) and 1092 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 335 non-default cases were misclassified as defaults (false positives), while 324 default cases were incorrectly predicted as non-defaults (false negatives), potentially leading to losses in revenue for a financial institution.</p>
-<div id="7acd5259" class="cell" data-execution_count="22">
+<p>Figure 8 visualises the error within the classification model. The matrix reveals that the model correctly identified 1080 non-default cases (true negatives) and 1092 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 340 non-default cases were misclassified as defaults (false positives), while 324 default cases were incorrectly predicted as non-defaults (false negatives), potentially leading to losses in revenue for a financial institution.</p>
+<div id="844c96db" class="cell" data-execution_count="22">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -521,12 +521,12 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Figure 9 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that <em>LoanIntRate</em> and <em>LoanPercentIncome</em> have the strongest positive associations with default, with odds ratios of 2.574 and 1.97 , respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, <em>PersonIncome</em> has an odds ratio of 0.574, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.</p>
+<p>Figure 9 shows the odds ratios for the LR model. Odds ratios were calculated allowing an easy interpretation of the relationships between the individual features and credit risk. The odds ratio indicate the increase in the risk of defaulting for a one-unit increase in that variable. The results indicate that <em>LoanIntRate</em> and <em>LoanPercentIncome</em> have the strongest positive associations with default, with odds ratios of 2.591 and 1.985 , respectively. This suggests that as interest rates or the proportion of income allocated to the loan increase, the likelihood of default rises significantly. Conversely, <em>PersonIncome</em> has an odds ratio of 0.578, implying that higher income levels reduce the probability of default, aligning with expectations in traditional credit risk assessment.</p>
 </section>
 <section id="random-forest" class="level3">
 <h3 class="anchored" data-anchor-id="random-forest"><strong>3.2 Random Forest</strong></h3>
 <p>The second model that was developed and compared with the LR model was an RF as they have been shown to have superior performance than LR models (Couronné et al., 2018). This model was trained on all the standard variables.</p>
-<div id="63b9bac5" class="cell" data-execution_count="24">
+<div id="1658cd46" class="cell" data-execution_count="24">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -536,7 +536,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>The ROC curve, illustrated in Figure 10 for the RF model showcases its improved classification ability in distinguishing between defaulting and non-defaulting cases and can be compared to LRs. The model achieved a excellent AUC of 0.931 (Çorbacıoğlu, 2023), indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction, however this highly accurate performance may indicate overfitting.</p>
-<div id="7fead8a0" class="cell" data-execution_count="25">
+<div id="893aa9c8" class="cell" data-execution_count="25">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -545,8 +545,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>The confusion matrix (Figure 11) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for 1304 instances (True Negatives), and correctly identified defaulting for 1123 instances (True Positives). However, there were 116 false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and 293 false negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.</p>
-<div id="1c93e05d" class="cell" data-execution_count="26">
+<p>The confusion matrix (Figure 11) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for 1310 instances (True Negatives), and correctly identified defaulting for 1116 instances (True Positives). However, there were 110 false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and 300 false negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.</p>
+<div id="531815d4" class="cell" data-execution_count="26">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -560,7 +560,7 @@ ul.task-list li input[type="checkbox"] {
 <section id="xgboost" class="level3">
 <h3 class="anchored" data-anchor-id="xgboost"><strong>3.3 XGBoost</strong></h3>
 <p>The third model that I deployed to improve upon the RF model was an XGBoost as they have been shown to reduce potential overfitting and have higher performance and speed than RFs (GeeksforGeeks, 2024).</p>
-<div id="467d98d1" class="cell" data-execution_count="28">
+<div id="ecf019a7" class="cell" data-execution_count="28">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -569,8 +569,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Figure 13 visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = 0.946), demonstrating excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; <em>max_depth</em> and <em>min_child_weight</em> along with L1 + L2 regularisation.</p>
-<div id="1699e366" class="cell" data-execution_count="29">
+<p>Figure 13 visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = 0.944), demonstrating excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; <em>max_depth</em> and <em>min_child_weight</em> along with L1 + L2 regularisation.</p>
+<div id="5a891a15" class="cell" data-execution_count="29">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -579,12 +579,12 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Figure 14 reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts 48 more true positives than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, avoiding potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has 9 fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.</p>
-<div id="5f055827" class="cell" data-execution_count="30">
+<p>Figure 14 reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts 48 more true positives than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, avoiding potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has 7 fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.</p>
+<div id="d7296dac" class="cell" data-execution_count="30">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Blog_files/figure-html/cell-31-output-1.png" width="781" height="267" class="figure-img"></p>
+<p><img src="Blog_files/figure-html/cell-31-output-1.png" width="778" height="267" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -593,7 +593,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="model-evaluation-and-comparisons" class="level3">
 <h3 class="anchored" data-anchor-id="model-evaluation-and-comparisons"><strong>3.4 Model Evaluation and Comparisons</strong></h3>
-<div id="4291f077" class="cell" data-execution_count="31">
+<div id="a23d6be7" class="cell" data-execution_count="31">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -603,7 +603,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <div class="cell" data-execution_count="33">
-<div class="cell-output cell-output-display" data-execution_count="33">
+<div class="cell-output cell-output-display" data-execution_count="101">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 5 -Performance Metrics for Each Model</caption>
 <thead>
@@ -621,41 +621,72 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td>LR</td>
-<td>0.768</td>
-<td>0.765</td>
+<td>0.766</td>
+<td>0.763</td>
 <td>0.771</td>
-<td>0.768</td>
+<td>0.767</td>
 <td>0.833</td>
-<td>8.375</td>
-<td>0.232</td>
+<td>8.439</td>
+<td>0.234</td>
 </tr>
 <tr class="even">
 <td>RF</td>
-<td>0.856</td>
-<td>0.906</td>
-<td>0.793</td>
-<td>0.846</td>
+<td>0.855</td>
+<td>0.91</td>
+<td>0.788</td>
+<td>0.845</td>
 <td>0.931</td>
-<td>5.198</td>
-<td>0.144</td>
+<td>5.211</td>
+<td>0.145</td>
 </tr>
 <tr class="odd">
 <td>XGB</td>
 <td>0.87</td>
-<td>0.904</td>
-<td>0.827</td>
-<td>0.864</td>
-<td>0.946</td>
-<td>4.702</td>
+<td>0.909</td>
+<td>0.822</td>
+<td>0.863</td>
+<td>0.944</td>
+<td>4.69</td>
 <td>0.13</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Figure 16 compares model accuracy, showing that XGBoost (0.87) performs best, followed closely by the RF (0.856), while LR lags behind at 0.768. This highlights the superior performance of ensemble models over LR in classification tasks.</p>
-<p>Table 5 provides a more detailed breakdown, confirming XGBoost as the strongest model, with the highest AUC (0.946), recall (0.827), and F1 score (0.864). RF (AUC = 0.931, F1 = 0.846) follow closely, both offering strong predictive performance. LR underperforms across all metrics, with the lowest AUC (0.833) and the highest log loss (8.375), indicating weaker reliability.</p>
+<p>Figure 16 compares model accuracy, showing that XGBoost (0.87) performs best, followed closely by the RF (0.855), while LR lags behind at 0.766. This highlights the superior performance of ensemble models over LR in classification tasks.</p>
+<p>Table 5 provides a more detailed breakdown, confirming XGBoost as the strongest model, with the highest AUC (0.944), recall (0.822), and F1 score (0.863). RF (AUC = 0.931, F1 = 0.845) follow closely, both offering strong predictive performance. LR underperforms across all metrics, with the lowest AUC (0.833) and the highest log loss (8.439), indicating weaker reliability.</p>
 <p>The lower log loss and Brier scores for XGBoost reflect better probability calibration, while LR’s higher values suggest less confidence in predictions. Overall, XGBoost provide the best balance of accuracy, precision, and reliability, making them the most effective model in credit risk analysis.</p>
+<div class="cell" data-execution_count="35">
+<div class="cell-output cell-output-display" data-execution_count="103">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<caption>Table 6 - Top 3 Most Important Features for Each Model</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Logistic Regression</th>
+<th data-quarto-table-cell-role="th">Random Forest</th>
+<th data-quarto-table-cell-role="th">XGBoost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PersonIncome</td>
+<td>LoanPercentIncome</td>
+<td>LoanGrade</td>
+</tr>
+<tr class="even">
+<td>LoanPercentIncome</td>
+<td>PersonIncome</td>
+<td>PersonHomeOwnership</td>
+</tr>
+<tr class="odd">
+<td>LoanIntRate</td>
+<td>LoanIntRate</td>
+<td>LoanPercentIncome</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Table 6 summarises the key predictors of default for each model. LR relies on <em>PersonIncome</em>, <em>LoanPercentIncome</em>, and <em>LoanIntRate</em>, suggesting a linear relationship between income, loan percentage, and default risk. RF prioritises <em>LoanPercentIncome</em> and <em>PersonIncome</em>, indicating the importance of relative loan burden, while also recognising <em>LoanIntRate</em>. XGBoost identifies <em>LoanGrade</em> as the most influential feature, followed by <em>PersonHomeOwnership</em> and <em>LoanPercentIncome</em>, reflecting a broader assessment of creditworthiness. The differences suggest that tree-based models (RF, XGBoost) capture non-linear relationships better than LR, which is constrained to linear associations.</p>
 </section>
 <section id="practical-implications-and-limiations" class="level3">
@@ -666,7 +697,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion"><strong>4. Conclusion</strong></h2>
-<p>This project compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (0.87) and AUC (0.946), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters, leading to financial losses. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.</p>
+<p>This project compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (0.87) and AUC (0.944), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters, leading to financial losses. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.</p>
 <p>Feature importance analysis revealed key differences in how these models assess risk. LR prioritised income-based factors, whereas RF and XGB incorporated broader indicators such as <em>LoanGrade</em> and <em>PersonHomeOwnership</em>. This suggests that ensemble methods offer a more nuanced and holistic approach to credit risk assessment, moving beyond simple financial metrics.</p>
 <p>Despite their strengths, XGB and RF come with limitations. Their complexity makes them harder to interpret, which could be a barrier in regulated financial environments. They also require careful tuning to avoid overfitting, meaning their performance depends heavily on parameter selection. Future work should focus on improving explainability, reducing bias in training data, and optimising hyperparameters to further refine predictive performance.</p>
 <p><a href="https://github.com/JoshLG18/DSE-EMP-Project">Link to Github Repository = BEE2041 Data Science In Economics Empirical Project</a></p>
