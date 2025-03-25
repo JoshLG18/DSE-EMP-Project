@@ -18,29 +18,33 @@ The libraries used in this project are:
 
 ## Files
 
-.
-├── Makefile                 # Code to reproduce results (render project)
-├── README.md                # You are here!
-├── Blog.txt                 # Text file contianing github link and blog post link
-├── Project/                 # All main project content
-│   ├── Blog.qmd             # Quarto source file
-|   |── _quarto.yml          # Quarto configuration file
-|   |── _publish.yml         # Publishing configuration file
-|   |── .gitignore           # Files to be ignored by git
-|   |── Outputs/             # Rendered project files
-|   |   └── Blog.html        # Rendered project html
-|   |   └── Blog.pdf         # Rendered project pdf
-│   |   └── Blog_files/      # Auto-generated assets for Blog.html
-│   ├── Data/                # Raw data
+├── Makefile              # Reproducibility: command to render the project
+├── README.md             # This file
+├── Blog.txt              # Contains GitHub repo and blog post link
+
+├── Project/              # All project content
+│   ├── Blog.qmd              # Main Quarto source file
+│   ├── _quarto.yml           # Quarto config file
+│   ├── _publish.yml          # Quarto publishing config
+│   ├── .gitignore            # Files to ignore in Git
+│
+│   ├── Outputs/              # Rendered outputs
+│   │   ├── Blog.html             # Rendered HTML
+│   │   ├── Blog.pdf              # Rendered PDF
+│   │   └── Blog_files/          # Auto-generated HTML assets
+│
+│   ├── Data/                 # Raw data
 │   │   └── credit_risk_dataset.csv
-│   ├── Tables/              # Auto-generated LaTeX tables
+│
+│   ├── Tables/               # LaTeX tables generated in code
 │   │   ├── missing_values_latex.tex
 │   │   ├── summary_statistics_latex.tex
 │   │   ├── performance_latex.tex
 │   │   ├── top_features_latex.tex
 │   │   ├── variable_info_table.tex
 │   │   └── vif_latex.tex
-│   └── References/          # Bibliography and citation style
+│
+│   └── References/          # Citations & bibliography
 │       ├── apa.csl
 │       └── References.bib
 
