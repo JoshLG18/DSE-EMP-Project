@@ -576,8 +576,8 @@ auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
 plt.rcParams.update({'font.size': 14})
 # Plot ROC Curve for Logistic Regression
 plt.figure(figsize=(9, 6))
-plt.plot(fpr_lr, tpr_lr, color="black", linewidth=2, label=f"AUC: {auc_value_LR}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
+plt.plot(fpr_lr, tpr_lr, color="blue", linewidth=2, label=f"AUC: {auc_value_LR}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.figtext(0.5, -0.1, "Figure 7: ROC Curve for Logistic Regression Model", ha="center", fontsize=9)
@@ -596,7 +596,7 @@ conf_df_lr = pd.DataFrame(conf_matrix_lr, index=["No Default", "Default"],
 
 # Plot Confusion Matrix for Logistic Regression
 plt.figure(figsize=(9, 2.5))
-sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+sns.heatmap(conf_df_lr, annot=True, fmt="d", cmap="Blues", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.figtext(0.5, -0.15, "Figure 8: Confusion Matrix for Logistic Regression Model", ha="center", fontsize=9)
@@ -699,8 +699,8 @@ plt.rcParams.update({'font.size': 14})
 
 # Plot ROC Curve for Random Forest
 plt.figure(figsize=(9, 6))
-plt.plot(fpr_rf, tpr_rf, color="black", linewidth=2, label=f"AUC: {auc_value_RF}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
+plt.plot(fpr_rf, tpr_rf, color="blue", linewidth=2, label=f"AUC: {auc_value_RF}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.suptitle("Figure 10: ROC Curve for Random Forest Model", y = -0.05, fontsize=9)
@@ -719,7 +719,7 @@ conf_df_rf = pd.DataFrame(conf_matrix_rf, index=["No Default", "Default"],
 
 # Plot Confusion Matrix for Random Forest
 plt.figure(figsize=(9, 3))
-sns.heatmap(conf_df_rf, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+sns.heatmap(conf_df_rf, annot=True, fmt="d", cmap="Blues", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.suptitle("Figure 11: Confusion Matrix for Random Forest Model", y = -0.05, fontsize=9)
@@ -750,7 +750,7 @@ importance_df_rf = importance_df_rf.sort_values(by='Importance', ascending=False
 
 # Plot the feature importances
 plt.figure(figsize=(7.5, 3))
-sns.barplot(x='Importance', y='Feature', data=importance_df_rf, palette=sns.color_palette("Greys", n_colors=len(importance_df_rf)), edgecolor='black')
+sns.barplot(x='Importance', y='Feature', data=importance_df_rf, palette=sns.color_palette("Blues", n_colors=len(importance_df_rf)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure 12: Feature Importances from Random Forest Model", y = -0.1, fontsize=10, x = 0.5)
@@ -823,8 +823,8 @@ plt.rcParams.update({'font.size': 14})
 
 # Plot ROC Curve for XGBoost
 plt.figure(figsize=(9, 6))
-plt.plot(fpr_xgb, tpr_xgb, color="black", linewidth=2, label=f"AUC: {auc_value_XGB}")
-plt.plot([0, 1], [0, 1], linestyle="--", color="grey")  # Reference diagonal
+plt.plot(fpr_xgb, tpr_xgb, color="blue", linewidth=2, label=f"AUC: {auc_value_XGB}")
+plt.plot([0, 1], [0, 1], linestyle="--", color="red")  # Reference diagonal
 plt.xlabel("False Positive Rate (1 - Specificity)")
 plt.ylabel("True Positive Rate (Sensitivity)")
 plt.suptitle("Figure 13: ROC Curve for XGBoost Model", y = -0.05, fontsize=9)
@@ -843,7 +843,7 @@ conf_df = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
 
 # Plot Confusion Matrix
 plt.figure(figsize=(9, 2.5))
-sns.heatmap(conf_df, annot=True, fmt="d", cmap="Greys", linewidths=0.5, cbar=False, annot_kws={"size": 24})
+sns.heatmap(conf_df, annot=True, fmt="d", cmap="Blues", linewidths=0.5, cbar=False, annot_kws={"size": 24})
 plt.xlabel("Predicted Class")
 plt.ylabel("Actual Class")
 plt.suptitle("Figure 14: Confusion Matrix for XGBoost Model", y = -0.1, fontsize=9)
@@ -873,7 +873,7 @@ importance_df_xgb = importance_df_xgb.sort_values(by='Importance', ascending=Fal
 
 # Plot the feature importances
 plt.figure(figsize=(7.5, 2.5))
-sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Greys", n_colors=len(importance_df_xgb)), edgecolor='black')
+sns.barplot(x='Importance', y='Feature', data=importance_df_xgb, palette=sns.color_palette("Blues", n_colors=len(importance_df_xgb)), edgecolor='black')
 plt.xlabel('Importance')
 plt.ylabel('Feature')
 plt.suptitle("Figure 15: Feature Importances from XGBoost Model", y = -0.1, fontsize=10, x = 0.5)
@@ -1015,7 +1015,18 @@ with open(file_path, "w") as f:
     f.write(top_features_latex)
 ```
 
+
+::: {.content-visible when-format="pdf"}
 \input{Tables/top_features_table.tex}
+:::
+
+::: {.content-visible when-format="html"}
+```{python}
+#| tbl-cap: "Table 6 - Top 3 Most Important Features for Each Model"
+HTML(top_features_df.to_html(index=False))
+```
+
+:::
 
 Table 6 summarises the key predictors of default for each model. LR relies on *PersonIncome*, *LoanPercentIncome*, and *LoanIntRate*, suggesting a linear relationship between income, loan percentage, and default risk. RF prioritises *LoanPercentIncome* and *PersonIncome*, indicating the importance of relative loan burden, while also recognising *LoanIntRate*. XGBoost identifies *LoanGrade* as the most influential feature, followed by *PersonHomeOwnership* and *LoanPercentIncome*, reflecting a broader assessment of creditworthiness. The differences suggest that tree-based models (RF, XGBoost) capture non-linear relationships better than LR, which is constrained to linear associations.
 
