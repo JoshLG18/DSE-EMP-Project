@@ -18,6 +18,7 @@ The libraries used in this project are:
 
 ## Files
 
+.
 ├── Makefile                 # Code to reproduce results (render project)
 ├── README.md                # You are here!
 ├── Blog.txt                 # Text file contianing github link and blog post link
