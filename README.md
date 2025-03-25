@@ -17,12 +17,31 @@ The libraries used in this project are:
 - statsmodels 0.14.4
 
 ## Files
-- Coursework.qmd contains all the code and analysis for the project.
-- Coursework.pdf is the pdf version of the project.
-- Apa.csl is the citation style used in the project.
-- References.bib contains the references used in the project.
-- Data/  contains the data used in the project.
-- Tables/ contains the tables generated in the project.
+
+├── Makefile                 # Code to reproduce results (render project)
+├── README.md                # You are here!
+├── Project/                 # All main project content
+│   ├── Blog.qmd             # Quarto source file
+|   |── _quarto.yml          # Quarto configuration file
+|   |── .gitignore           # Files to be ignored by git
+|   |── docs/                # Rendered project files
+|   |   └──Blog.html         # Rendered project file
+|   |   └── Blog.pdf         # Rendered project file
+│   |   └── Blog_files/      # Auto-generated assets for Blog.html
+|   |   └── search.json      # Search index for Blog.html
+|   |   └── _site.yml        # Site configuration file
+│   ├── Data/                # Raw data
+│   │   └── credit_risk_dataset.csv
+│   ├── Tables/              # Auto-generated LaTeX tables
+│   │   ├── missing_values_latex.tex
+│   │   ├── summary_statistics_latex.tex
+│   │   ├── performance_latex.tex
+│   │   ├── top_features_latex.tex
+│   │   ├── variable_info_table.tex
+│   │   └── vif_latex.tex
+│   └── References/          # Bibliography and citation style
+│       ├── apa.csl
+│       └── References.bib
 
 ## How to reproduce the results
 - To reproduce the results, you can run the code within the project using the command 'make' within the terminal.

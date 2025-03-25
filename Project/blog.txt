@@ -1,0 +1,3 @@
+Link to Github = https://github.com/JoshLG18/DSE-EMP-Project
+
+Link to Blog Post = https://joshlg18.github.io/DSE-EMP-Project/

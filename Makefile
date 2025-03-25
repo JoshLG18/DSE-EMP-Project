@@ -1,21 +1,16 @@
-# Define variables
 QUARTO = quarto
-TARGET = Coursework.qmd
-OUTPUT = Coursework.pdf
+QPROJECT = Project  # your Quarto project folder
 
-# Default target
 all: render
 
-# Render the Quarto document
 render:
-	$(QUARTO) render $(TARGET)
+	$(QUARTO) render $(QPROJECT) 
 
-# Clean auxiliary files
-clean:
-	rm -rf *.log *.aux *.out *_cache/ *_files/ $(OUTPUT)
-
-# Show the output (cross-platform)
 open:
-	xdg-open $(OUTPUT) || open $(OUTPUT)  # Works on Linux & macOS
+	open $(QPROJECT)/docs/index.html
 
-.PHONY: all render clean open
+clean:
+	rm -rf $(QPROJECT)/docs/
+
+.PHONY: all render open clean
+
