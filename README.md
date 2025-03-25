@@ -17,7 +17,7 @@ The libraries used in this project are:
 - statsmodels 0.14.4
 
 ## Files
-
+```
 ├── Makefile              # Reproducibility: command to render the project
 ├── README.md             # This file
 ├── Blog.txt              # Contains GitHub repo and blog post link
@@ -47,6 +47,7 @@ The libraries used in this project are:
 │   └── References/          # Citations & bibliography
 │       ├── apa.csl
 │       └── References.bib
+```
 
 ## How to reproduce the results
 - To reproduce the results, you can run the code within the project using the command 'make' within the terminal.
