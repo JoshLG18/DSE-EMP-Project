@@ -30,7 +30,6 @@ The libraries used in this project are:
 │
 │   ├── Outputs/              # Rendered outputs
 │   │   ├── Blog.html             # Rendered HTML
-│   │   ├── Blog.pdf              # Rendered PDF
 │   │   └── Blog_files/          # Auto-generated HTML assets
 │
 │   ├── Data/                 # Raw data
