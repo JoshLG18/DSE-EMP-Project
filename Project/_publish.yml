@@ -1,4 +1,0 @@
-- source: Blog.qmd
-  quarto-pub:
-    - id: 796fc15b-fc73-4186-9f92-fc9e2918231f
-      url: https://joshlg18.quarto.pub/predicting-loan-defaults-a-data-driven-approach-to-credit-risk-analysis

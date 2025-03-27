@@ -1,22 +1,22 @@
 \begin{table}[H]\centering
-\caption{Variable Information}
+\caption{Variable Information (Including Missing Values)}
 \label{Table 1:variable_info}
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-Variable & Data Type & Definition \\
+Variable & Data Type & Definition & Missing Values \\
 \midrule
-PersonAge & int64 & Age of the borrower \\
-PersonIncome & int64 & Income of the borrower \\
-PersonHomeOwnership & object & Home ownership of the borrower \\
-PersonEmpLength & float64 & Employment length of the borrower \\
-LoanIntent & object & Intention of the loan \\
-LoanGrade & int64 & Loan grade \\
-LoanAmnt & int64 & Amount of the loan (USD) \\
-LoanIntRate & float64 & Loan interest rate \\
-LoanStatus & int64 & Loan status (0 - not defaulted, 1 - defaulted) \\
-LoanPercentIncome & float64 & Loan percentage of income \\
-PreviousDefault & object & If the borrower has defaulted before \\
-CredHistory & int64 & Credit history length \\
+PersonAge & int64 & Age of the borrower & 0 \\
+PersonIncome & int64 & Income of the borrower & 0 \\
+PersonHomeOwnership & object & Home ownership of the borrower & 0 \\
+PersonEmpLength & float64 & Employment length of the borrower & 887 \\
+LoanIntent & object & Intention of the loan & 0 \\
+LoanGrade & object & Loan grade & 0 \\
+LoanAmnt & int64 & Amount of the loan (USD) & 0 \\
+LoanIntRate & float64 & Loan interest rate & 3095 \\
+LoanStatus & int64 & Loan status (0 - not defaulted, 1 - defaulted) & 0 \\
+LoanPercentIncome & float64 & Loan percentage of income & 0 \\
+PreviousDefault & object & If the borrower has defaulted before & 0 \\
+CredHistory & int64 & Credit history length & 0 \\
 \bottomrule
 \end{tabular}
 \end{table}

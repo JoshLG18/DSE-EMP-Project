@@ -5,11 +5,6 @@ format:
   html:
     toc: true
     number-sections: false
-  pdf:
-    toc: true
-    number-sections: false
-    include-in-header:
-      - text: \usepackage{float}
 
 execute:
   echo: false
