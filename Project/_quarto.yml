@@ -3,8 +3,11 @@ project:
 
 format:
   html:
+    theme: flatly
     toc: true
     number-sections: false
+
+title-block-banner: true
 
 execute:
   echo: false

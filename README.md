@@ -18,34 +18,39 @@ The libraries used in this project are:
 
 ## Files
 ```
-├── Makefile              # Reproducibility: command to render the project
-├── README.md             # This file
-├── Blog.txt              # Contains GitHub repo and blog post link
+├── Makefile                  # Reproducibility: command to render the project
+├── README.md                 # This file
+├── Blog.txt                  # Contains GitHub repo and blog post link
 
-├── Project/              # All project content
+├── Project/                  # All project content
 │   ├── Blog.qmd              # Main Quarto source file
 │   ├── _quarto.yml           # Quarto config file
 │   ├── _publish.yml          # Quarto publishing config
 │   ├── .gitignore            # Files to ignore in Git
 │
-│   ├── Outputs/              # Rendered outputs
-│   │   ├── Blog.html             # Rendered HTML
-│   │   └── Blog_files/          # Auto-generated HTML assets
+│   ├── Outputs/               # Rendered outputs
+│       └── Blog.html          # Rendered HTML
+│       └── Blog_files/        # Auto-generated HTML assets
+|       └── Images/            # Images used in the project
+│           └── banner.png
 │
-│   ├── Data/                 # Raw data
-│   │   └── credit_risk_dataset.csv
+│   ├── Data/                  # Raw data
+│       └── credit_risk_dataset.csv
 │
-│   ├── Tables/               # LaTeX tables generated in code
-│   │   ├── missing_values_latex.tex
-│   │   ├── summary_statistics_latex.tex
-│   │   ├── performance_latex.tex
-│   │   ├── top_features_latex.tex
-│   │   ├── variable_info_table.tex
-│   │   └── vif_latex.tex
-│
-│   └── References/          # Citations & bibliography
-│       ├── apa.csl
+│   ├── Tables/                # LaTeX tables generated in code
+│       └── missing_values_latex.tex
+│       └── summary_statistics_latex.tex
+│       └── performance_latex.tex
+│       └── top_features_latex.tex
+│       └── variable_info_table.tex
+│       └── vif_latex.tex
+│   
+│   ├── References/            # Citations & bibliography
+│       └── apa.csl
 │       └── References.bib
+│
+|   ├── Images                 # Images used in the project
+│       └── banner.png
 ```
 
 ## How to reproduce the results

@@ -12,6 +12,19 @@ execute:
   results: false
 ---
 
+::: {style="display: flex; align-items: center; gap: 1em;"}
+
+<div style="display: flex; flex-direction: column; align-items: center; margin-right: 1em;">
+  <a href="https://github.com/JoshLG18" target="_blank">
+    <img src="Image/github.png" alt="GitHub" width="30" height="30" style="margin-bottom: 8px;">
+  </a>
+  <a href="https://www.linkedin.com/in/josh-le-grice-aa0223261/" target="_blank">
+    <img src="Image/linkedin.png" alt="LinkedIn" width="30" height="30">
+  </a>
+</div>
+:::
+
+![Image from: https://www.istockphoto.com/photos/credit-card-cash](Image/banner.jpg){width="100%" height="200px"}
 
 ```{python}
 import os
@@ -126,10 +139,6 @@ missing_LoanIntRate = variable_info.loc[variable_info['Variable'] == 'LoanIntRat
 ```
 
 ### **2.1 Preparing the Data**
-
-::: {.content-visible when-format="pdf"}
-\input{Tables/variable_info_table.tex}
-:::
 
 ::: {.content-visible when-format="html"}
 ```{python}
@@ -290,41 +299,35 @@ loan_data[numeric_cols] = pd.DataFrame(
     columns=numeric_cols, index=loan_data.index
 )
 
-# === DOWNSAMPLING ===
-default_counts_before = loan_data['LoanStatus'].value_counts()
-default_0 = loan_data[loan_data['LoanStatus'] == 0]
-default_1 = loan_data[loan_data['LoanStatus'] == 1]
-default_0_downsampled = resample(default_0, replace=False, n_samples=len(default_1), random_state=123)
-loan_data_balanced = pd.concat([default_0_downsampled, default_1])
-default_counts_after = loan_data_balanced['LoanStatus'].value_counts()
-
+# Plotting class imbalance
+default_counts = loan_data['LoanStatus'].value_counts()
 distribution_df = pd.DataFrame({
-    'Before Downsampling': default_counts_before,
-    'After Downsampling': default_counts_after
-}).rename_axis('LoanStatus').reset_index().melt(id_vars='LoanStatus', var_name='Stage', value_name='Count')
+    'LoanStatus': default_counts.index,
+    'Count': default_counts.values
+})
 
-loan_data = loan_data_balanced
+distribution_df['Stage'] = 'Loan Status'
 
 # === COMBINED PLOT ===
 fig, axes = plt.subplots(3, 1, figsize=(8, 8))
 
 # Boxplot before normalisation
 loan_data_pre.boxplot(ax=axes[0])
-axes[0].set_title("(a): Box Plots of All Variables Before Normalisation", fontsize=10)
+axes[0].set_title("(a): Box Plots of ALL Variables Before Normalisation", fontsize=10)
 axes[0].tick_params(axis='x', labelrotation=45)
 
 # Boxplot after normalisation
 loan_data.boxplot(ax=axes[1])
-axes[1].set_title("(b): Box Plots of All Variables After Normalisation", fontsize=10)
+axes[1].set_title("(b): Box Plots of ALL Variables After Normalisation", fontsize=10)
 axes[1].tick_params(axis='x', labelrotation=45)
 
-# Distribution before/after downsampling
+# Class imbalance plot (no downsampling)
 sns.barplot(x='Stage', y='Count', hue='LoanStatus', data=distribution_df,
             palette=['#4A90E2', '#003366'], ax=axes[2])
-axes[2].set_title("(c): Distribution of LoanStatus Before and After Downsampling", fontsize=10)
-axes[2].set_xlabel("Stage")
+axes[2].set_title("(c): Distribution of LoanStatus", fontsize=10)
 axes[2].set_ylabel("Count")
-axes[2].legend(title="Default", loc='upper right')
+axes[2].set_xlabel("")  # removes the 'Stage' label
+axes[2].legend(title='Default', loc='upper right')
 
 plt.tight_layout(rect=[0, 0, 1, 0.98])
 plt.show()
@@ -333,7 +336,7 @@ plt.show()
 
 Figure 2(a) shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
 
-Figure 2(c) demonstrates the the distribution of *LoanStatus* within the dataset. Before downsampling there was a large discrepancy between the number of people who defaulted and who didn't. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, downsampling was performed to ensure both outcomes had the same number of observations.
+Figure 2(c) demonstrates the the distribution of *LoanStatus* within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I will implement class weighting within my ML models.
 
 ### **2.4 Correlation and Multicollinearity Analysis**
 
@@ -392,7 +395,7 @@ PA_vs_CH = corr_matrix.loc["CredHistory", "PersonAge"].round(2)
 
 Figure 3(a) shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required.
 
-VIF values for all the variables are shown within Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt* and *LoanPercentIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Other models are tree based and handle multicollinearity well, therefore no futher processing is needed.
+VIF values for all the variables are shown within Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Other models are tree based and handle multicollinearity well, therefore no futher processing is needed.
 
 Within this analysis, LR, RF, XGboost models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
@@ -400,7 +403,7 @@ Within this analysis, LR, RF, XGboost models will be trained to predict ***LoanS
 
 ### **2.5 Causal Analysis**
 
-This section explores the heterogeneous impact of previous loan default on the likelihood of defaulting again, using a causal forest framework. By estimating Conditional Average Treatment Effects (CATEs), we can uncover how the effect of prior default varies across individual borrower profiles
+This section explores the heterogeneous impact of *PreviousDefault* on the likelihood of defaulting again, using a causal forest framework. *PreviousDefault* was used within this analysis as Hand & Henley (1997) observed past defaulting status has a strong association with loan defaulting. By estimating Conditional Average Treatment Effects (CATEs), we can uncover how the effect of prior default varies across individual borrower profiles
 
 ```{python}
 #| label: fig-causal_a
@@ -444,14 +447,14 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
-Figure 4 shows estimated CATEs, revealing a negativley-skewed distribution with most values centered near zero. This suggests that, for the majority of borrowers, previous default status has a limited marginal effect on the likelihood of defaulting again. However, a notable subgroup exhibits significantly positive CATEs, indicating elevated risk. These individuals may represent vulnerable borrower profiles for whom previous financial distress is a strong predictor of future default. The long right tail highlights the importance of heterogeneity in treatment effects and supports the use of a causal forest over average-effect models.
+Figure 4 shows estimated CATEs, revealing a negativley-skewed distribution with most values centered near zero. This suggests that, for the majority of borrowers, previous default status has a limited marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behavior. The long right tail emphasizes the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.
 
 \newpage
 
 
 ## **3. Machine Learning Analysis**
 
-Before training the models, the dataset was split into training and testing sets using an 80:20 ratio to ensure fair evaluation on unseen data. To optimise model performance and avoid overfitting, hyperparameter tuning was conducted using grid search combined with 3-fold cross-validation and L1 + L2 regularisation.
+Before training the models, the dataset was split into training and testing sets using an 80:20 ratio to ensure fair evaluation on unseen data. To optimise model performance and avoid overfitting, hyperparameter tuning was conducted using grid search combined with 3-fold cross-validation and L1 + L2 regularisation. To deal with the class imbalance class weighting was implemented along with prioritising F1-score to reduce financial losses from false negatives but allow the model to remain precise.
 
 ### **3.1 Logistic Regression**
 
@@ -469,7 +472,14 @@ param_grid = {
 
 # Initialize Grid Search with Cross-Validation for Logistic Regression
 stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
-grid_search = GridSearchCV(LogisticRegression(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(
+    LogisticRegression(class_weight='balanced', random_state=42),
+    param_grid,
+    cv=stratified_kfold,
+    scoring='f1',
+    verbose=0,
+    n_jobs=-1
+)
 
 grid_search.fit(X_train, y_train)
 
@@ -602,7 +612,14 @@ param_grid = {
 stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
 # Initialize Grid Search with Cross-Validation
-grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+grid_search = GridSearchCV(
+    RandomForestClassifier(class_weight='balanced', random_state=42),
+    param_grid,
+    cv=stratified_kfold,
+    scoring='f1',     # Focused on minimizing false negatives
+    verbose=0,
+    n_jobs=-1
+)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -708,18 +725,32 @@ The third model that I deployed to improve upon the RF model was an XGBoost as t
 
 ```{python}
 # Define the parameter grid for Grid Search
+# Calculate the class imbalance ratio
+neg, pos = np.bincount(y_train)
+scale_pos_weight = neg / pos
+
+# Define the parameter grid for Grid Search
 param_grid = {
     'n_estimators': [200],
     'max_depth': [10, 20],
     'learning_rate': [0.01, 0.1],
     'subsample': [0.8, 1.0],
     'colsample_bytree': [0.8, 1.0],
-    'min_child_weight': [1, 5],  # Minimum sum of instance weight (hessian) in a child
-    'reg_alpha': [0, 0.1],  # L1 regularization (feature selection)
-    'reg_lambda': [0.5, 1]  # L2 regularization (weight shrinkage)
+    'min_child_weight': [1, 5],
+    'reg_alpha': [0, 0.1],
+    'reg_lambda': [0.5, 1],
+    'scale_pos_weight': [scale_pos_weight],  # 👈 Add this
 }
 
-grid_search = GridSearchCV(XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='auc'), param_grid, cv=stratified_kfold, scoring='accuracy', verbose=0, n_jobs=-1)
+# Initialize Grid Search with f1 scoring
+grid_search = GridSearchCV(
+    XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='aucpr'),
+    param_grid,
+    cv=stratified_kfold,
+    scoring='f1',
+    verbose=0,
+    n_jobs=-1
+)
 grid_search.fit(X_train, y_train)
 
 # Get the best parameters and best score
@@ -904,13 +935,13 @@ plt.subplots_adjust(hspace=0.4)
 plt.show()
 ```
 
-Figure 8(a) compares model accuracy, showing that XGBoost (`{python} str(accuracyXGB)`) performs best, followed closely by the RF (`{python} str(accuracyRF)`), while LR lags behind at `{python} str(accuracyLR)`. This highlights the superior performance of ensemble models over LR in classification tasks.
+Figure 8(a) shows that XGBoost (`{python} str(accuracyXGB)`) achieves the highest accuracy, closely followed by Random Forest (`{python} str(accuracyRF)`), while Logistic Regression lags (`{python} str(accuracyLR)`). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimizing the cost of misclassifying defaulters is critical (Hand & Henley, 1997)
 
-Figure 8(b) provides a more detailed breakdown, confirming XGBoost as the strongest model, with the highest AUC (`{python} str(auc_value_XGB)`), recall (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF (AUC = `{python} str(auc_value_RF)`, F1 = `{python} str(f1_scoreRF)`) follow closely, both offering strong predictive performance. LR underperforms across all metrics, with the lowest AUC (`{python} str(auc_value_LR)`) and the highest log loss (`{python} str(log_loss_LR)`), indicating weaker reliability.
+Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the appliactions of this model. Also LR has, the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration. 
 
-The lower log loss and Brier scores for XGBoost reflect better probability calibration, while LR’s higher values suggest less confidence in predictions. Overall, XGBoost provide the best balance of accuracy, precision, and reliability, making them the most effective model in credit risk analysis.
+In credit risk analysis, recall is critical—missing a default is costlier than a false alarm (Hand & Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
 
-Table 8(c) summarises the key predictors of default for each model. LR relies on *PersonIncome*, *LoanPercentIncome*, and *LoanIntRate*, suggesting a linear relationship between income, loan percentage, and default risk. RF prioritises *LoanPercentIncome* and *PersonIncome*, indicating the importance of relative loan burden, while also recognising *LoanIntRate*. XGBoost identifies *LoanGrade* as the most influential feature, followed by *PersonHomeOwnership* and *LoanPercentIncome*, reflecting a broader assessment of creditworthiness. The differences suggest that tree-based models (RF, XGBoost) capture non-linear relationships better than LR, which is constrained to linear associations.
+Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritize features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively (Zhou et al., 2002), making them more suited to complex credit risk tasks.
 
 ### **3.5 Practical Implications and Limiations**
 
@@ -922,7 +953,7 @@ Despite their advantages, ensemble models present several challenges. Their comp
 \newpage
 
 ## **4. Conclusion**
-This project compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (`{python} str(accuracyXGB)`) and AUC (`{python} str(auc_value_XGB)`), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower recall suggests it may miss some defaulters, leading to financial losses. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.
+This project compared the effectiveness of LR, RF, and XGB in predicting loan defaults, with results showing that ensemble models significantly outperform traditional approaches. XGB achieved the highest accuracy (`{python} str(accuracyXGB)`), AUC (`{python} str(auc_value_XGB)`), and F1-score (`{python} str(f1_scoreXGB)`), demonstrating its ability to capture complex patterns in financial data. RF also performed well, but its slightly lower sensitivity suggests it may miss some defaulters, leading to financial losses. In contrast, LR lagged behind due to its reliance on linear relationships, making it less suited for this type of predictive task.
 
 Feature importance analysis revealed key differences in how these models assess risk. LR prioritised income-based factors, whereas RF and XGB incorporated broader indicators such as *LoanGrade* and *PersonHomeOwnership*. This suggests that ensemble methods offer a more nuanced and holistic approach to credit risk assessment, moving beyond simple financial metrics.
 
