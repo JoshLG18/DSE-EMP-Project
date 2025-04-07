@@ -46,6 +46,8 @@ import statsmodels.api as sm
 from sklearn.utils import resample
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # ML Models
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -142,13 +144,13 @@ missing_LoanIntRate = variable_info.loc[variable_info['Variable'] == 'LoanIntRat
 
 ::: {.content-visible when-format="html"}
 ```{python}
-#| tbl-cap: "Table 1 - Variable Information"
+#| tbl-cap: "Table 1: Variable Information"
 HTML(variable_info.to_html(index=False))
 ```
 
 :::
 
-Table 1 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoaanIntRate*, containing `{python} str(missing_PersonEmpLength)` and `{python} str(missing_LoanIntRate)` observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the positively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure 5, therefore regression imputation was used to fill these missing variables and not lose sample size. Also, any duplicate observations were removed to mitigate their impact on the models, this reduced the sample size to `{python} str(nrow_post)` observations.
+Table 1 displays the missing values within the dataset for each variable. The only variables with missing data are *PersonEmpLength* and *LoanIntRate*, containing `{python} str(missing_PersonEmpLength)` and `{python} str(missing_LoanIntRate)` observations with no values, respectively. Missing data can have a large impact on data analysis if not handled properly and can lead to skewed or incorrect conclusions, making handling this data in the correct way crucial. Due to the positively skewed nature of *PersonEmpLength*, illustrated in Figure 1, median imputation was deployed in order to maintain the observations and not impact sample size. *LoanIntRate* saw a high correlation with *LoanGrade*, shown by Figure 5, therefore regression imputation was used to fill these missing variables and not lose sample size. Also, any duplicate observations were removed to mitigate their impact on the models, this reduced the sample size to `{python} str(nrow_post)` observations.
 
 ```{python}
 # Fixing missings
@@ -228,7 +230,7 @@ max_PEL_after = loan_data['PersonEmpLength'].max().astype(int)
 
 ::: {.content-visible when-format="html"}
 ```{python}
-#| tbl-cap: "Table 2 - Summary Statistics for Each Variable"
+#| tbl-cap: "Table 2: Summary Statistics for Each Variable"
 
 HTML(summary_stats.to_html(index=False))
 
@@ -269,7 +271,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positivley skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*, *PersonEmpLength* and *CredLength* have very similar distributions, indicating potential correlation between these variables.
+The histograms shown in Figure 1 illustrate the distributions for each numeric variable. All of the variables shown have positively skewed distributions. This is due to individuals with low age likely to have low values in each of these variables. *PersonAge*, *PersonEmpLength* and *CredHistory* have very similar distributions, indicating potential correlation between these variables.
 
 ```{python}
 #| label: fig-data-over
@@ -336,7 +338,7 @@ plt.show()
 
 Figure 2(a) shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
 
-Figure 2(c) demonstrates the the distribution of *LoanStatus* within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed perforamnce metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I will implement class weighting within my ML models.
+Figure 2(c) demonstrates the distribution of *LoanStatus* within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed performance metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I implemented class weighting within my ML models.
 
 ### **2.4 Correlation and Multicollinearity Analysis**
 
@@ -369,7 +371,7 @@ vif_data["VIF"] = [variance_inflation_factor(X_vif.values, i+1) for i in range(l
 vif_data = vif_data.round(2).sort_values(by="VIF", ascending=False)
 
 # Plot layout: 2 rows — heatmap on top, VIF table below
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12), gridspec_kw={'height_ratios': [3, 1]})
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12), gridspec_kw={'height_ratios': [2, 1]})
 
 # Correlation matrix
 sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="Blues", linewidths=0.5, ax=ax1)
@@ -380,11 +382,17 @@ ax2.axis('off')
 table = ax2.table(cellText=vif_data.values,
                   colLabels=vif_data.columns,
                   cellLoc='center',
-                  loc='upper center')
+                  loc='upper left')
+
+# Make header bold
+for (row, col), cell in table.get_celld().items():
+    if row == 0:  # Header row
+        cell.set_text_props(weight='bold')
+
 table.auto_set_font_size(False)
 table.set_fontsize(10)
 table.scale(0.7, 2)
-ax2.set_title("(b): Variance Inflation Factors (VIF)",pad = 20)
+ax2.set_title("(b): Variance Inflation Factors (VIF)",pad = 5, x = 0.37)
 
 plt.tight_layout()
 plt.show()
@@ -393,9 +401,9 @@ LG_vs_LIR = corr_matrix.loc["LoanIntRate", "LoanGrade"].round(2)
 PA_vs_CH = corr_matrix.loc["CredHistory", "PersonAge"].round(2)
 ```
 
-Figure 3(a) shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the mullticolliearity in the data, these variables may have to be removed however, futher analysis with variance inflation factor (VIF) is required.
+Figure 3(a) shows a correlation plot quantifying the relationships between the variables and to the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (`{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). Both these relationships make logical sense as someone who is older who have a longer credit history and as loan grade increases it is likley that the interest rate does as well. Due to the multicollinearity in the data, these variables may have to be removed however, further analysis with variance inflation factor (VIF) is required.
 
-VIF values for all the variables are shown within Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Other models are tree based and handle multicollinearity well, therefore no futher processing is needed.
+VIF values for all the variables are shown within Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which shows multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the affects of multicollinearity. Other models are tree based and handle multicollinearity well, therefore no further processing is needed.
 
 Within this analysis, LR, RF, XGboost models will be trained to predict ***LoanStatus*** using *PersonAge*, *PersonIncome*, *PersonHomeOwnership*, *PersonEmpLength*, *LoanIntent*, *LoanGrade*, *LoanAmnt*, *LoanIntRate*, *LoanPercentIncome*, *PreviousDefault* and *CredHistory*.
 
@@ -447,7 +455,7 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
-Figure 4 shows estimated CATEs, revealing a negativley-skewed distribution with most values centered near zero. This suggests that, for the majority of borrowers, previous default status has a limited marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behavior. The long right tail emphasizes the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.
+Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centered near zero. This suggests that, for the majority of borrowers, previous default status has a limited marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behavior. The long right tail emphasizes the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.
 
 \newpage
 
@@ -717,7 +725,7 @@ The ROC curve, illustrated in Figure 6(a), for the RF model showcases its improv
 
 The confusion matrix (Figure 6(b)) for the RF model provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for `{python} str(TN_rf)` instances (True Negatives), and correctly identified defaulting for `{python} str(TP_rf)` instances (True Positives). However, there were `{python} str(FP_rf)` false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and `{python} str(FN_rf)` false negatives. This confusion matrix reiterates the improved performance from the LR as the incorret classification instances have decreased.
 
-Figure 6(c) demonstrates the most influential features when predicting credit risk by visualising feature importance calculated using mean decrease in accuracy. *`{python} Feature_1`* is the most important feature suggesting that the proportion of income allocated to a loan has the strongest impact on the model’s predictions, supporting the conclusions from the LR which ranked it second. *`{python} Feature_2`* and *`{python} Feature_3`* are also shown to be within the top 3 most important features as they are in the LR model. Contrastly, to the LR, the RF shows *`{python} Feature_4`* to have high importance whereas Figure 8 shows it to have very little impact on credit risk for the LR model, potentially attributed to the differences in model architecture.
+Figure 6(c) demonstrates the most influential features when predicting credit risk by visualising feature importance calculated using mean decrease in accuracy. *`{python} Feature_1`* is the most important feature suggesting that the proportion of income allocated to a loan has the strongest impact on the model’s predictions, supporting the conclusions from the LR which ranked it second. *`{python} Feature_2`* and *`{python} Feature_3`* are also shown to be within the top 3 most important features as they are in the LR model. Conversely, to the LR, the RF shows *`{python} Feature_4`* to have high importance whereas Figure 8 shows it to have very little impact on credit risk for the LR model, potentially attributed to the differences in model architecture.
 
 ### **3.3 XGBoost**
 
@@ -793,7 +801,7 @@ importance_df_xgb = pd.DataFrame({
 conf_matrix_xgb = pd.DataFrame(conf_matrix_xgb, index=["No Default", "Default"],
                            columns=["No Default", "Default"])
 
-# --- Create Grid Layout ---
+ # --- Create Grid Layout ---
 fig = plt.figure(constrained_layout=True, figsize=(10, 10))
 gs = fig.add_gridspec(3, 2, height_ratios=[1, 1, 1])
 
@@ -825,6 +833,7 @@ ax2.set_title("(c): Feature Importances")
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.show()
 
+
 TN_xgb = conf_matrix_xgb.iloc[0, 0]  # True Negatives (No Default correctly classified)
 FP_xgb = conf_matrix_xgb.iloc[0, 1]  # False Positives (Non-default misclassified as Default)
 FN_xgb = conf_matrix_xgb.iloc[1, 0]  # False Negatives (Default misclassified as Non-default)
@@ -841,11 +850,11 @@ imp_Feature_3 = importance_df_xgb.iloc[2,1].round(3)
 
 ```
 
-Figure 7(a) visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = `{python} str(auc_value_XGB)`), demonstrating excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model is performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; *max_depth* and *min_child_weight* along with L1 + L2 regularisation.
+Figure 7(a) visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score when compared to the RF (AUC = `{python} str(auc_value_XGB)`), demonstrating excellent predictive performance (Çorbacıoğlu, 2023). Despite the higher AUC score this model's performance is less likely to be attributed to potential overfitting due to built in regularisation parameters; *max_depth* and *min_child_weight* along with L1 + L2 regularisation.
 
-Figure 7(b) reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts `{python} str(TP_xgb - TP_rf)` more true positives than the RF model did, indicating better sensitivity which is useful for a lending insitution as this allows them to not give credit to these individuals, avoiding potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has `{python} str(FP_xgb - FP_rf)` fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. this figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.
+Figure 7(b) reiterates the increased performance of the XGBoost when compared to the RF model. The XGBoost predicts `{python} str(TP_xgb - TP_rf)` more true positives than the RF model did, indicating better sensitivity which is useful for a lending institution as this allows them to not give credit to these individuals, avoiding potentially revenue losses. Although the difference is small, defaulting can have large financial losses. The model also has `{python} str(FP_xgb - FP_rf)` fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters. This figure shows that the XGBoost model demonstrates a balanced improvement, capturing more true positives while keeping false positives low, making it a stronger candidate for credit risk assessment.
 
-Figure 7(c) contradicts the other models (LR and RF), as these models predicted *`{python} Feature_1`* to have less of an impact on the preditions than the XGBoost model. However, similar to the RF and LR model, the XGBoost placed high importance on *`{python} Feature_2`* reinforcing the notion that the proportion of income allocated to a loan significantly impacts the risk of defaulting. However, *`{python} Feature_3`* ranks higher than in the RF and LR, indicating that home ownership status may play a larger role in how XGBoosts evaluates credit risk.
+Figure 7(c) contradicts the other models (LR and RF), as these models predicted *`{python} Feature_1`* to have less of an impact on the predictions than the XGBoost model. However, similar to the RF and LR model, the XGBoost placed high importance on *`{python} Feature_2`* reinforcing the notion that the proportion of income allocated to a loan significantly impacts the risk of defaulting. However, *`{python} Feature_3`* ranks higher than in the RF and LR, indicating that home ownership status may play a larger role in how XGBoosts evaluates credit risk.
 
 \newpage
 
@@ -937,13 +946,13 @@ plt.show()
 
 Figure 8(a) shows that XGBoost (`{python} str(accuracyXGB)`) achieves the highest accuracy, closely followed by Random Forest (`{python} str(accuracyRF)`), while Logistic Regression lags (`{python} str(accuracyLR)`). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimizing the cost of misclassifying defaulters is critical (Hand & Henley, 1997)
 
-Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the appliactions of this model. Also LR has, the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration. 
+Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the applications of this model. Also LR has, the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration. 
 
 In credit risk analysis, recall is critical—missing a default is costlier than a false alarm (Hand & Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
 
 Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritize features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively (Zhou et al., 2002), making them more suited to complex credit risk tasks.
 
-### **3.5 Practical Implications and Limiations**
+### **3.5 Practical Implications and Limitations**
 
 The findings demonstrate the effectiveness of ensemble learning models, particularly XGBoost and RF, in improving credit risk assessment. These models outperform traditional approaches by capturing complex patterns in financial data and handling imbalanced datasets more effectively (Chopra & Bhilare, 2018). By focusing on key predictors such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome*, lenders can refine their risk assessment frameworks, improving accuracy while minimising misclassification errors. This enables better-informed lending decisions, reducing default rates and enhancing overall portfolio performance. 
 
