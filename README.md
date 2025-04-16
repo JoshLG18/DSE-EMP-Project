@@ -49,8 +49,10 @@ The libraries used in this project are:
 │       └── apa.csl
 │       └── References.bib
 │
-|   ├── Images                 # Images used in the project
+|   ├── Image                 # Images used in the project
 │       └── banner.png
+│       └── github.png
+│       └── linkedin.png
 ```
 
 ## How to reproduce the results
