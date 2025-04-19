@@ -47,7 +47,7 @@ The libraries used in this project are:
 │   
 │   ├── References/            # Citations & bibliography
 │       └── apa.csl
-│       └── References.bib
+│       └── references.bib
 │
 |   ├── Image                 # Images used in the project
 │       └── banner.png
