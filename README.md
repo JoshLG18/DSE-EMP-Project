@@ -36,14 +36,6 @@ The libraries used in this project are:
 │
 │   ├── Data/                  # Raw data
 │       └── credit_risk_dataset.csv
-│
-│   ├── Tables/                # LaTeX tables generated in code
-│       └── missing_values_latex.tex
-│       └── summary_statistics_latex.tex
-│       └── performance_latex.tex
-│       └── top_features_latex.tex
-│       └── variable_info_table.tex
-│       └── vif_latex.tex
 │   
 │   ├── References/            # Citations & bibliography
 │       └── apa.csl
