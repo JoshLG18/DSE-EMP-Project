@@ -6,8 +6,9 @@ format:
     theme: flatly 
     toc: true
     number-sections: false
-
-
+    csl: References/apa.csl     
+    bibliography: References/references.bib
+    
 title-block-banner: true
 
 execute:
