@@ -18,7 +18,7 @@ execute:
 :::
 ::::
 
-![Image from: https://www.istockphoto.com/photos/credit-card-cash](Image/banner.jpg){width="100%" height="200px"}
+![Image from: https://www.indusind.com/iblogs/personal-loan/how-to-make-sure-your-personal-loan-application-gets-approved/](Image/banner.jpg){width="100%" height="200px"}
 
 ```{python}
 import os
@@ -49,6 +49,23 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from xgboost import XGBClassifier
 ```
 
+```{python}
+plt.rcParams.update({
+    'figure.facecolor': '#ebebeb',       # Overall figure background
+    'axes.facecolor': '#ebebeb',         # Axes (inside the plot) background
+    'savefig.facecolor': '#ebebeb',      # Background for saved images
+    'axes.edgecolor': 'black',           # Border of plot box
+    'axes.labelcolor': 'black',          # X and Y label text
+    'xtick.color': 'black',              # X-axis tick labels
+    'ytick.color': 'black',              # Y-axis tick labels
+    'text.color': 'black',               # General text (titles, annotations)
+    'axes.titlecolor': 'black',          # Plot title color
+    'legend.edgecolor': 'black',
+    'legend.facecolor': '#ebebeb',       # Legend box background
+    'lines.color': 'black',              # Default line color
+})
+```
+
 ## **1. Why Predicting Defaults Matters More Than Ever**
 
 Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these kinds of predictions [@Yang:2024].
@@ -69,7 +86,7 @@ ncol_pre = loan_data.shape[1]
 loan_data.columns = ['PersonAge', 'PersonIncome', 'PersonHomeOwnership', 'PersonEmpLength', 'LoanIntent', 'LoanGrade', 'LoanAmnt', 'LoanIntRate', 'LoanStatus', 'LoanPercentIncome', 'PreviousDefault', 'CredHistory']
 ```
 
-Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle (reference), consisting of `{python} str(ncol_pre)` variables/columns and `{python} str(nrows_pre)` observations, illustrated in Table 1.
+Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle [@Tse:2020], consisting of `{python} str(ncol_pre)` variables/columns and `{python} str(nrows_pre)` observations, illustrated in Table 1.
 
 ```{python}
 # Data Cleaning
@@ -366,7 +383,7 @@ LG_vs_LIR = corr_matrix.loc["LoanIntRate", "LoanGrade"].round(2)
 PA_vs_CH = corr_matrix.loc["CredHistory", "PersonAge"].round(2)
 ```
 
-Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (r = `{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). These patterns are expected—older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While such correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.
+Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (r = `{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While such correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.
 
 VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, and *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which indicates multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.
 
@@ -428,7 +445,7 @@ Within this analysis, LR, RF, and XGboost models will be trained to predict ***L
 
 Before training the models, the dataset was split into train and test sets using an 80:20 ratio to ensure fair evaluation on unseen data. To optimise model performance and avoid overfitting, hyperparameter tuning was conducted using grid search combined with 3-fold cross-validation and L1 + L2 regularisation. To deal with the class imbalance, class weighting was implemented along with prioritising F1-score to reduce financial losses from false negatives but allow the model to remain precise.
 
-### 3.1 Machine Learning in Action: LR, RF, and XGBoost
+### **3.1 Machine Learning in Action: LR, RF, and XGBoost**
 
 ::: {.panel-tabset .tabset-pills .w-100}
 
@@ -568,7 +585,7 @@ Figure 5(a) shows the ROC curve for the LR model, an indication of the trade-off
 
 Figure 5(b) visualises the error within the classification model. The matrix reveals that the model correctly identified `{python} str(TN)` non-default cases (true negatives) and `{python} str(TP)` default cases (true positives), demonstrating its ability to capture both classes effectively. However, `{python} str(FP)` non-default cases were misclassified as defaults (false positives), while `{python} str(FN)` defaulters were missed (false negatives), which could result in financial loss for lenders.
 
-Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)`, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, indicates that higher income lowers default probability—consistent with economic expectations.
+Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)`, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, indicates that higher income lowers default probability, consistent with economic expectations.
 
 
 ### **3.1.2 Random Forest**
@@ -922,7 +939,7 @@ Figure 8(a) shows that XGBoost (`{python} str(accuracyXGB)`) achieves the highes
 
 Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the applications of this model. Also LR has, the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration.
 
-In credit risk analysis, recall is critical—missing a default is costlier than a false alarm (Hand & Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
+In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm (Hand & Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
 
 Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritize features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively [@Zhou:2002], making them more suited to complex credit risk tasks.
 
@@ -996,7 +1013,9 @@ f1_mortgagers = fairness_results.loc[fairness_results['Group'] == "Mortgage", 'F
 HTML(fairness_results.to_html(index=False))
 ```
 
-The fairness audit of the XGBoost model highlights clear differences in recall across borrower subgroups. While overall accuracy remains high, recall is substantially lower for high-income (`{python} str(recall_high_income)`) and mortgage (`{python} str(recall_mortgagers)`) groups, suggesting the model is less effective at flagging defaulters in these categories. In contrast, renters (`{python} str(recall_renters)`) and homeowners (`{python} str(recall_homeowners)`) benefit from stronger sensitivity. These gaps may reflect imbalanced data or overlapping traits that obscure risk signals—for instance, mortgagers may combine stable income with high debt, complicating predictions. High-income defaulters may also be underrepresented, reducing model focus. Addressing these differences through subgroup-aware tuning or fairness constraints can improve equity in credit assessments.
+The fairness audit of the XGBoost model highlights clear differences in recall across borrower subgroups. While overall accuracy remains high, recall is substantially lower for high-income (`{python} str(recall_high_income)`) and mortgage (`{python} str(recall_mortgagers)`) groups, suggesting the model is less effective at flagging defaulters in these categories. In contrast, renters (`{python} str(recall_renters)`) and homeowners (`{python} str(recall_homeowners)`) benefit from stronger sensitivity. These gaps may reflect imbalanced data or overlapping traits that obscure risk signals. For instance, mortgagers may combine stable income with high debt, complicating predictions. High-income defaulters may also be underrepresented, reducing model focus. Addressing these differences through subgroup-aware tuning or fairness constraints can improve equity in credit assessments.
+
+<hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
 ### **3.4 From Models to Meaning: What We Can Learn**
 
@@ -1008,10 +1027,15 @@ However, there are trade-offs. These models are harder to interpret, which can b
 
 ## **4. Key Takeaways**
 
-This project compared the performance of Logistic Regression, Random Forest, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics — with the highest accuracy (`{python} str(accuracyXGB)`), AUC (`{python} str(auc_value_XGB)`), and F1-score (`{python} str(f1_scoreXGB)`), showing its strength in capturing complex, non-linear patterns in borrower behavior. Random Forest also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. Logistic Regression trailed behind, limited by its simpler, linear structure.
+This project compared the performance of Logistic Regression, Random Forest, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (`{python} str(accuracyXGB)`), AUC (`{python} str(auc_value_XGB)`), and F1-score (`{python} str(f1_scoreXGB)`), showing its strength in capturing complex, non-linear patterns in borrower behavior. Random Forest also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. Logistic Regression trailed behind, limited by its simpler, linear structure.
 
 When looking at what each model focused on, LR leaned heavily on income-based features like PersonIncome and LoanPercentIncome. In contrast, RF and XGBoost picked up broader signals, giving more weight to LoanGrade and PersonHomeOwnership. This suggests that ensemble models offer a more rounded view of credit risk.
 
 To explore how default risk changes across different borrowers, a causal forest was used to estimate Conditional Average Treatment Effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.
 
-Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems — to make sure everyone gets a fair shot
+Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot
+
+## **5. References**
+
+::: {#refs}
+:::

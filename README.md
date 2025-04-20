@@ -27,12 +27,14 @@ The libraries used in this project are:
 │   ├── _quarto.yml           # Quarto config file
 │   ├── _publish.yml          # Quarto publishing config
 │   ├── .gitignore            # Files to ignore in Git
+│   ├── styles.css             # CSS styles for the blog
 │
 │   ├── Outputs/               # Rendered outputs
 │       └── Blog.html          # Rendered HTML
 │       └── Blog_files/        # Auto-generated HTML assets
 |       └── Images/            # Images used in the project
 │           └── banner.png
+│       └── styles.css         # CSS styles for the blog
 │
 │   ├── Data/                  # Raw data
 │       └── credit_risk_dataset.csv

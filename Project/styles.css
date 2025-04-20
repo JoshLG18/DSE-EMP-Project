@@ -1,0 +1,120 @@
+/* ===== GLOBAL SETTINGS ===== */
+body {
+    background-color: #ebebeb !important;
+    color: black;
+  }
+  
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+  
+  a:hover {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+  
+  /* --------------------- Table of Contents (ToC) --------------------- */
+  nav.toc a,
+  nav.toc .nav-link {
+    color: black !important;
+    text-decoration: none !important;
+    font-weight: 600;
+  }
+  
+  nav.toc .nav-link:hover,
+  nav.toc .nav-link:focus,
+  nav.toc .nav-link.active {
+    color: black !important;
+    text-decoration: underline !important;
+    font-weight: bold !important;
+  }
+  
+  /* Fix for deeply nested TOC levels */
+  nav.toc .nav > .nav-item > .nav-link {
+    color: black !important;
+  }
+  
+  /* -------------------- Panel Tabs -------------------- */
+  .panel-tabset .nav-tabs {
+    background-color: transparent !important;
+    border: none !important;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  
+  .panel-tabset .nav-tabs .nav-link {
+    background-color: #2d3e51 !important;
+    color: #ebebeb !important;
+    margin-right: 5px;
+    border: #ebebeb;
+    border-radius: 8px 8px 0 0;
+    padding: 0.5em 1.2em;
+    font-weight: 500;
+  }
+  
+  .panel-tabset .nav-tabs .nav-link.active {
+    background-color: #ebebeb !important;
+    color: #2d3e51 !important;
+    border: 1px solid #2d3e51;
+    border-bottom: none;
+    z-index: 10;
+    font-weight: bold;
+  }
+  
+  .panel-tabset .tab-content {
+    background-color: #ebebeb !important;
+    color: black !important;
+  }
+  
+  /* -------------------- Section Headers -------------------- */
+  h1, h2 {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* -------------------- References and Appendix -------------------- */
+  #refs,
+  #refs h2,
+  #refs > div,
+  #refs > p,
+  .quarto-appendix,
+  .quarto-appendix > div,
+  .quarto-appendix .quarto-article {
+    background-color: #ebebeb !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  #refs {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  #refs h2 {
+    font-size: 1.6em;
+    font-weight: bold;
+    margin-top: 2em;
+    color: black !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  
+  /* -------------------- CSL Links in References -------------------- */
+  .csl-entry,
+  .csl-entry a,
+  .quarto-appendix a {
+    background-color: transparent !important;
+    color: black !important;
+    text-decoration: none !important;
+  }
+  
+  .csl-entry a:hover,
+  .quarto-appendix a:hover {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+  

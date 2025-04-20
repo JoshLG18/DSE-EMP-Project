@@ -3,12 +3,12 @@ project:
 
 format:
   html:
-    theme: flatly 
+    theme: flatly
+    css: styles.css         
     toc: true
     number-sections: false
-    csl: References/apa.csl     
+    csl: References/apa.csl
     bibliography: References/references.bib
-    
 title-block-banner: true
 
 execute:
