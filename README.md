@@ -15,6 +15,8 @@ The libraries used in this project are:
 - scipy 1.15.2
 - xgboost 2.1.4
 - statsmodels 0.14.4
+- plotly 6.0.1
+- ipython 8.32.0
 
 ## Files
 ```

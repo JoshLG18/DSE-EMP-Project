@@ -12,10 +12,23 @@ execute:
   results: false
 ---
 
-:::: {style="display: flex; align-items: center; gap: 1em;"}
-::: {style="display: flex; flex-direction: column; align-items: center; margin-right: 1em;"}
-<a href="https://github.com/JoshLG18" target="_blank"> <img src="Image/github.png" alt="GitHub" width="50" height="50" style="margin-bottom: 8px;"/> </a> <a href="https://www.linkedin.com/in/josh-le-grice-aa0223261/" target="_blank"> <img src="Image/linkedin.png" alt="LinkedIn" width="50" height="50"/> </a>
-:::
+:::: {style="display: flex; justify-content: flex-start; gap: 1em; margin-top: 0em;"}
+
+<!-- GitHub -->
+<a href="https://github.com/JoshLG18" target="_blank">
+  <img src="Image/github.png" alt="GitHub" width="50" height="50" />
+</a>
+
+<!-- LinkedIn -->
+<a href="https://www.linkedin.com/in/josh-le-grice-aa0223261/" target="_blank">
+  <img src="Image/linkedin.png" alt="LinkedIn" width="50" height="50" />
+</a>
+
+<!-- Download Dataset -->
+<a href="data/credit_risk_dataset.csv" download title="Download Dataset">
+  <img src="Image/dataset.png" alt="Download Dataset" width="50" height="50" />
+</a>
+
 ::::
 
 ![Image from: https://www.indusind.com/iblogs/personal-loan/how-to-make-sure-your-personal-loan-application-gets-approved/](Image/banner.jpg){width="100%" height="200px"}
@@ -1021,7 +1034,7 @@ The fairness audit of the XGBoost model highlights clear differences in recall a
 
 This project showed that ensemble learning models like XGBoost and Random Forest can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better [@Chopra:2018]. Features such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome* emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.
 
-However, there are trade-offs. These models are harder to interpret, which can be a challenge in regulated sectors where transparency is important (Afolabi, 2024). They also demand more computational power, which might limit access for smaller institutions [@Lei:2025]. Without proper tuning, they can overfit on skewed data [@Cheng:2021]. There's also the risk of reinforcing biases present in the training data, potentially leading to unfair outcomes in lending [@Shah:2025]. Moving forward, improving explainability, tuning, and fairness will be essential for making these models more practical and trustworthy.
+However, there are trade-offs. These models are harder to interpret, which can be a challenge in regulated sectors where transparency is important [@Rudin:2019]. They also demand more computational power, which might limit access for smaller institutions [@Lei:2025]. Without proper tuning, they can overfit on skewed data [@Cheng:2021]. There's also the risk of reinforcing biases present in the training data, potentially leading to unfair outcomes in lending [@Shah:2025]. Moving forward, improving explainability, tuning, and fairness will be essential for making these models more practical and trustworthy.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
@@ -1034,6 +1047,27 @@ When looking at what each model focused on, LR leaned heavily on income-based fe
 To explore how default risk changes across different borrowers, a causal forest was used to estimate Conditional Average Treatment Effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.
 
 Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot
+
+<!-- Back to Top Button -->
+<button onclick="topFunction()" id="backToTopBtn" title="Go to top">↑ Top</button>
+
+<script>
+  // Show the button when user scrolls down
+  window.onscroll = function () {
+    let btn = document.getElementById("backToTopBtn");
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+      btn.style.display = "block";
+    } else {
+      btn.style.display = "none";
+    }
+  };
+
+  // Scroll to top smoothly
+  function topFunction() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
 
 ## **5. References**
 
