@@ -25,18 +25,20 @@ The libraries used in this project are:
 ├── Blog.txt                  # Contains GitHub repo and blog post link
 
 ├── Project/                  # All project content
-│   ├── Blog.qmd              # Main Quarto source file
-│   ├── _quarto.yml           # Quarto config file
-│   ├── _publish.yml          # Quarto publishing config
-│   ├── .gitignore            # Files to ignore in Git
-│   ├── styles.css             # CSS styles for the blog
+│   ├── Blog.qmd                    # Main Quarto source file
+│   ├── _quarto.yml                 # Quarto config file
+│   ├── _publish.yml                # Quarto publishing config
+│   ├── .gitignore                  # Files to ignore in Git
+│   ├── styles.css                  # CSS styles for the blog
 │
 │   ├── Outputs/               # Rendered outputs
-│       └── Blog.html          # Rendered HTML
-│       └── Blog_files/        # Auto-generated HTML assets
-|       └── Images/            # Images used in the project
+│       └── Blog.html               # Rendered HTML
+│       └── Blog_files/             # Auto-generated HTML assets
+|       └── Image/                  # Images used in the project
 │           └── banner.png
-│       └── styles.css         # CSS styles for the blog
+│       └── styles.css              # CSS styles for the blog
+│       └── data/                   # Contains data file used for the download link
+│           └── credit_risk_dataset.csv     # Data file used for the download link
 │
 │   ├── Data/                  # Raw data
 │       └── credit_risk_dataset.csv
@@ -49,6 +51,7 @@ The libraries used in this project are:
 │       └── banner.png
 │       └── github.png
 │       └── linkedin.png
+|       └── dataset.png
 ```
 
 ## How to reproduce the results

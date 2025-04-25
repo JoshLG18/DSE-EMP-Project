@@ -96,10 +96,10 @@ div.csl-indent {
   <li><a href="#why-predicting-defaults-matters-more-than-ever" id="toc-why-predicting-defaults-matters-more-than-ever" class="nav-link active" data-scroll-target="#why-predicting-defaults-matters-more-than-ever"><strong>1. Why Predicting Defaults Matters More Than Ever</strong></a></li>
   <li><a href="#exploring-risk-from-patterns-to-causal-effects" id="toc-exploring-risk-from-patterns-to-causal-effects" class="nav-link" data-scroll-target="#exploring-risk-from-patterns-to-causal-effects"><strong>2. Exploring Risk: From Patterns to Causal Effects</strong></a>
   <ul class="collapse">
-  <li><a href="#preparing-the-data-and-descriptive-statistics" id="toc-preparing-the-data-and-descriptive-statistics" class="nav-link" data-scroll-target="#preparing-the-data-and-descriptive-statistics"><strong>2.1 Preparing the Data and Descriptive Statistics</strong></a></li>
-  <li><a href="#distribution-analysis" id="toc-distribution-analysis" class="nav-link" data-scroll-target="#distribution-analysis"><strong>2.2 Distribution Analysis</strong></a></li>
-  <li><a href="#correlation-and-multicollinearity-analysis" id="toc-correlation-and-multicollinearity-analysis" class="nav-link" data-scroll-target="#correlation-and-multicollinearity-analysis"><strong>2.3 Correlation and Multicollinearity Analysis</strong></a></li>
-  <li><a href="#causal-analysis" id="toc-causal-analysis" class="nav-link" data-scroll-target="#causal-analysis"><strong>2.4 Causal Analysis</strong></a></li>
+  <li><a href="#getting-to-know-the-data-patterns-quality-and-first-impressions" id="toc-getting-to-know-the-data-patterns-quality-and-first-impressions" class="nav-link" data-scroll-target="#getting-to-know-the-data-patterns-quality-and-first-impressions"><strong>2.1 Getting to Know the Data: Patterns, Quality, and First Impressions</strong></a></li>
+  <li><a href="#how-the-data-behaves-exploring-distributions" id="toc-how-the-data-behaves-exploring-distributions" class="nav-link" data-scroll-target="#how-the-data-behaves-exploring-distributions"><strong>2.2 How the Data Behaves: Exploring Distributions</strong></a></li>
+  <li><a href="#detecting-relationships-and-multicollinearity-among-variables" id="toc-detecting-relationships-and-multicollinearity-among-variables" class="nav-link" data-scroll-target="#detecting-relationships-and-multicollinearity-among-variables"><strong>2.3 Detecting Relationships and Multicollinearity Among Variables</strong></a></li>
+  <li><a href="#moving-beyond-correlation-searching-for-causality" id="toc-moving-beyond-correlation-searching-for-causality" class="nav-link" data-scroll-target="#moving-beyond-correlation-searching-for-causality"><strong>2.4 Moving Beyond Correlation: Searching for Causality</strong></a></li>
   </ul></li>
   <li><a href="#can-machines-predict-who-defaults" id="toc-can-machines-predict-who-defaults" class="nav-link" data-scroll-target="#can-machines-predict-who-defaults"><strong>3. Can Machines Predict Who Defaults?</strong></a>
   <ul class="collapse">
@@ -135,22 +135,22 @@ div.csl-indent {
 </div>
 <section id="why-predicting-defaults-matters-more-than-ever" class="level2">
 <h2 class="anchored" data-anchor-id="why-predicting-defaults-matters-more-than-ever"><strong>1. Why Predicting Defaults Matters More Than Ever</strong></h2>
-<p>Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these kinds of predictions <span class="citation" data-cites="Yang:2024">(<a href="#ref-Yang:2024" role="doc-biblioref">Yang, 2024</a>)</span>.</p>
-<p>This project uses real-world loan data to compare the performance of three models: Logistic Regression (LR), Random Forest (RF), and XGBoost. Each model is tested using accuracy, precision, recall, F1-score, and AUC (Area under the curve). These metrics help assess how well the models identify defaulters and how reliable their predictions are overall <span class="citation" data-cites="Saito:2015">(<a href="#ref-Saito:2015" role="doc-biblioref">Saito &amp; Rehmsmeier, 2015</a>)</span>.</p>
+<p>Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these types of predictions <span class="citation" data-cites="Yang:2024">(<a href="#ref-Yang:2024" role="doc-biblioref">Yang, 2024</a>)</span>.</p>
+<p>This project uses real-world loan data to compare the performance of three models: Logistic Regression (LR), Random Forest (RF), and XGBoost. Each model is tested using accuracy, precision, recall, F1-score, and area under the curve (AUC). These metrics help assess how well the models identify defaulters and how reliable their predictions are overall <span class="citation" data-cites="Saito:2015">(<a href="#ref-Saito:2015" role="doc-biblioref">Saito &amp; Rehmsmeier, 2015</a>)</span>.</p>
 <p>The project also looks at fairness across different borrower groups to see if the models are biased towards or against certain types of applicants. Combining ML with causal analysis, it aims to give a deeper, more balanced view of credit risk prediction.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
 <section id="exploring-risk-from-patterns-to-causal-effects" class="level2">
 <h2 class="anchored" data-anchor-id="exploring-risk-from-patterns-to-causal-effects"><strong>2. Exploring Risk: From Patterns to Causal Effects</strong></h2>
 <p>Prior to conducting the analysis of credit risk, we need to understand and organise the data. For this analysis we will be using a loan defaulting dataset from Kaggle <span class="citation" data-cites="Tse:2020">(<a href="#ref-Tse:2020" role="doc-biblioref">Tse, 2020</a>)</span>, consisting of 12 variables/columns and 32580 observations, illustrated in Table 1.</p>
-<section id="preparing-the-data-and-descriptive-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="preparing-the-data-and-descriptive-statistics"><strong>2.1 Preparing the Data and Descriptive Statistics</strong></h3>
+<section id="getting-to-know-the-data-patterns-quality-and-first-impressions" class="level3">
+<h3 class="anchored" data-anchor-id="getting-to-know-the-data-patterns-quality-and-first-impressions"><strong>2.1 Getting to Know the Data: Patterns, Quality, and First Impressions</strong></h3>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">2.1.1 Variable Information</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">2.1.2 Summary Statistics</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display" data-execution_count="73">
+<div class="cell-output cell-output-display" data-execution_count="29">
 <table class="dataframe table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 1: Variable Information</caption>
 <thead>
@@ -241,7 +241,7 @@ div.csl-indent {
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display" data-execution_count="74">
+<div class="cell-output cell-output-display" data-execution_count="30">
 <table class="dataframe table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 2: Summary Statistics</caption>
 <thead>
@@ -374,11 +374,11 @@ div.csl-indent {
 <p>Table 1 and 2 display missing values and summary statistics for all variables. Only <em>PersonEmpLength</em> and <em>LoanIntRate</em> had missing values, with 887 and 3095, respectively. To maintain sample size and address skew, median imputation was used for <em>PersonEmpLength</em>, while <em>LoanIntRate</em>, highly correlated with <em>LoanGrade</em> (see Figure 5), was imputed using regression. Duplicate rows were also removed, reducing the dataset to 32415 observations. Additionally, implausible maximum values for <em>PersonAge</em> and <em>PersonEmpLength</em> (144 and 123) were treated as errors and removed. After filtering, the adjusted maximum values were 94 for <em>PersonAge</em> and 41 for <em>PersonEmpLength</em>, ensuring data integrity.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
-<section id="distribution-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="distribution-analysis"><strong>2.2 Distribution Analysis</strong></h3>
+<section id="how-the-data-behaves-exploring-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="how-the-data-behaves-exploring-distributions"><strong>2.2 How the Data Behaves: Exploring Distributions</strong></h3>
 <div id="cell-fig-dist" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
-<div id="fig-dist" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" data-fig-pos="H">
+<div id="fig-dist" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-pos="H" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="Blog_files/figure-html/fig-dist-output-1.png" class="quarto-figure quarto-figure-center figure-img" data-fig-pos="H" width="762" height="764">
@@ -405,12 +405,12 @@ Figure&nbsp;2: Data Preparation Overview
 </div>
 </div>
 </div>
-<p>Figure 2(a) shows that the data isn’t scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in <em>PersonIncome</em> is due to people earning considerably more than average.</p>
+<p>Figure 2(a) shows that the data isn’t scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed with normalised data shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in <em>PersonIncome</em> is due to people earning considerably more than average.</p>
 <p>Figure 2(c) demonstrates the distribution of <em>LoanStatus</em> within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed performance metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I implemented class weighting within my ML models.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
-<section id="correlation-and-multicollinearity-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="correlation-and-multicollinearity-analysis"><strong>2.3 Correlation and Multicollinearity Analysis</strong></h3>
+<section id="detecting-relationships-and-multicollinearity-among-variables" class="level3">
+<h3 class="anchored" data-anchor-id="detecting-relationships-and-multicollinearity-among-variables"><strong>2.3 Detecting Relationships and Multicollinearity Among Variables</strong></h3>
 <div id="cell-fig-Corr-Multi" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div id="fig-corr-multi" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -425,13 +425,13 @@ Figure&nbsp;3: Correlation and Multicollinearity Analysis
 </div>
 </div>
 </div>
-<p>Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target <em>LoanStatus</em>. <em>LoanGrade</em> and <em>LoanIntRate</em> have a high correlation coefficient (r = 0.95), indicating that they are highly correlated. Also, a similar relationship is shown between <em>PersonAge</em> and <em>CredHistory</em> (r = 0.81). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While such correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.</p>
+<p>Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target <em>LoanStatus</em>. <em>LoanGrade</em> and <em>LoanIntRate</em> have a high correlation coefficient (r = 0.95), indicating that they are highly correlated. Also, a similar relationship is shown between <em>PersonAge</em> and <em>CredHistory</em> (r = 0.81). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While these correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.</p>
 <p>VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), <em>LoanGrade</em>, <em>LoanIntRate</em>, <em>PersonAge</em>, and <em>CredHistory</em> have low VIF values, indicating low levels of multicollinearity. However, <em>LoanAmnt</em>, <em>LoanPercentIncome</em> and <em>PersonIncome</em> have VIF values greater than 10 which indicates multicollinearity and actions need to be taken to ensure they don’t affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
-<section id="causal-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="causal-analysis"><strong>2.4 Causal Analysis</strong></h3>
-<p>This section explores the heterogeneous impact of <em>PreviousDefault</em> on the likelihood of defaulting again, using a causal forest framework. <em>PreviousDefault</em> was used within this analysis as <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">Hand, D. J., &amp; Henley, W. E. (<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">1997</a>)</span> observed past defaulting status has a strong association with future loan defaults. By estimating Conditional Average Treatment Effects (CATEs), we can observe how the effect of previous default varies across individual borrower profiles.</p>
+<section id="moving-beyond-correlation-searching-for-causality" class="level3">
+<h3 class="anchored" data-anchor-id="moving-beyond-correlation-searching-for-causality"><strong>2.4 Moving Beyond Correlation: Searching for Causality</strong></h3>
+<p>This section explores the heterogeneous impact of <em>PreviousDefault</em> on the likelihood of defaulting again, using a causal forest framework. <em>PreviousDefault</em> was used within this analysis as <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">Hand, D. J., &amp; Henley, W. E. (<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">1997</a>)</span> observed past defaulting status has a strong association with future loan defaults. By estimating conditional average treatment effects (CATEs), we can observe how the effect of previous default varies across individual borrower profiles.</p>
 <div id="cell-fig-causal_a" class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div id="fig-causal_a" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -446,7 +446,7 @@ Figure&nbsp;4: Estimated Treatment Effects (CATE) for Previous Default
 </div>
 </div>
 </div>
-<p>Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centred near zero. This suggests that, for the majority of borrowers, previous default status has a marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behaviour. The long right tail emphasizes the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.</p>
+<p>Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centred near zero. This suggests that, for the majority of borrowers, previous default status has a marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behaviour. The long right tail emphasises the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
 </section>
@@ -469,15 +469,15 @@ Figure&nbsp;4: Estimated Treatment Effects (CATE) for Previous Default
 <img src="Blog_files/figure-html/fig-lr-vis-output-1.png" width="717" height="590" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lr-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Logistic Regression Model Visualizations
+Figure&nbsp;5: Logistic Regression Model Visualisations
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>Figure 5(a) shows the ROC curve for the LR model, an indication of the trade-off between sensitivity and specificity of the model. The model achieved an AUC score of 0.841, regarded as considerable <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>, indicating solid predictive performance when distinguishing between positive outcomes. The model’s curve lies well above the diagonal reference line (AUC = 0.5), which represents random classification, demonstrating its predictive applications. However, the graph shows room for improvement due to the true positive rate (TPR) remaining below 0.9.</p>
-<p>Figure 5(b) visualises the error within the classification model. The matrix reveals that the model correctly identified 3756 non-default cases (true negatives) and 1128 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 1293 non-default cases were misclassified as defaults (false positives), while 305 defaulters were missed (false negatives), which could result in financial loss for lenders.</p>
-<p>Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that <em>LoanIntRate</em> and <em>LoanPercentIncome</em> have the strongest positive associations with default, with odds ratios of 2.788 and 2.244, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, <em>PersonIncome</em> has an odds ratio of 0.601, indicates that higher income lowers default probability, consistent with economic expectations.</p>
+<p>Figure 5(b) visualises the error within the classification model. The matrix reveals that the model correctly identified 3764 non-default cases (true negatives) and 1128 default cases (true positives), demonstrating its ability to capture both classes effectively. However, 1285 non-default cases were misclassified as defaults (false positives), while 305 defaulters were missed (false negatives), which could result in financial loss for lenders.</p>
+<p>Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that <em>LoanIntRate</em> and <em>LoanPercentIncome</em> have the strongest positive associations with default, with odds ratios of 2.766 and 2.432, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, <em>PersonIncome</em> has an odds ratio of 0.653, indicating that higher income lowers default probability, consistent with economic expectations.</p>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <p>The second model that was developed and compared with the LR model was an RF, trained on all the standard variables, as they have been shown to have superior performance than LR models <span class="citation" data-cites="Couronne:2018">(<a href="#ref-Couronne:2018" role="doc-biblioref">Couronné et al., 2018</a>)</span>.</p>
@@ -489,14 +489,14 @@ Figure&nbsp;5: Logistic Regression Model Visualizations
 <img src="Blog_files/figure-html/fig-rf-vis-output-1.png" width="717" height="565" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rf-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Random Forest Model Visualizations
+Figure&nbsp;6: Random Forest Model Visualisations
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>The ROC curve, illustrated in Figure 6(a), showcases its improved classification ability in distinguishing between cases and can be compared to LRs. The model achieved a excellent AUC of 0.928 <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>, indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction, however highly accurate performance may indicate overfitting.</p>
-<p>The confusion matrix (Figure 6(b)) provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for 4990 instances (True Negatives), and correctly identified defaulting for 991 instances (True Positives). However, there were 59 false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and 442 false negatives. This confusion matrix reiterates the improved performance from the LR as the incorrect classification instances have decreased.</p>
+<p>The ROC curve, illustrated in Figure 6(a), showcases its improved classification ability in distinguishing between cases and can be compared to LRs. The model achieved a excellent AUC of 0.927 <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>, indicating strong predictive capability and shows that more complex models have the potential to improve credit risk prediction, however highly accurate performance may indicate overfitting.</p>
+<p>The confusion matrix (Figure 6(b)) provides a detailed comparison of actual versus predicted default status. In this case, the model correctly predicted non-default for 4996 instances (True Negatives), and correctly identified defaulting for 988 instances (True Positives). However, there were 53 false positives, where the model incorrectly predicted defaulting when the actual class was non-default, and 445 false negatives. This confusion matrix reiterates the improved performance from the LR as the incorrect classification instances have decreased.</p>
 <p>Figure 6(c) demonstrates the most influential features when predicting credit risk by visualising feature importance calculated using mean decrease in accuracy. <em>LoanIntRate</em> is the most important feature suggesting that the proportion of income allocated to a loan has the strongest impact on the model’s predictions, supporting the conclusions from the LR which ranked it second. <em>LoanPercentIncome</em> and <em>PersonIncome</em> are also shown to be within the top 3 most important features as they are in the LR model. Conversely, to the LR, the RF shows <em>LoanGrade</em> to have high importance whereas Figure 8 shows it to have very little impact on credit risk for the LR model, potentially attributed to the differences in model architecture.</p>
 </div>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
@@ -509,14 +509,14 @@ Figure&nbsp;6: Random Forest Model Visualizations
 <img src="Blog_files/figure-html/fig-xgb-vis-output-1.png" width="717" height="562" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-xgb-vis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: XGBoost Model Visualizations
+Figure&nbsp;7: XGBoost Model Visualisations
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Figure 7(a) visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score than the RF (AUC = 0.944), demonstrating excellent predictive performance <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>. Its built-in regularisation, max_depth, min_child_weight, and L1/L2 regularisation, reduces the risk of overfitting despite its complexity.</p>
-<p>Figure 7(b) reiterates the increased performance of the XGBoost. XGBoost predicts 36 more true positives than the RF, indicating better sensitivity avoiding potentially revenue losses due to defaulting. The model also has 3 fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters.</p>
+<p>Figure 7(a) visualises the performance of the XGBoost in classifying positive outcomes. This model achieves a slightly higher AUC score than the RF (AUC = 0.943), demonstrating excellent predictive performance <span class="citation" data-cites="Corbacioglu:2023">(<a href="#ref-Corbacioglu:2023" role="doc-biblioref">Çorbacıoğlu &amp; Aksel, 2023</a>)</span>. Its built-in regularisation, max_depth, min_child_weight, and L1/L2 regularisation, reduces the risk of overfitting despite its complexity.</p>
+<p>Figure 7(b) reiterates the increased performance of the XGBoost. XGBoost predicts 41 more true positives than the RF, indicating better sensitivity avoiding potentially revenue losses due to defaulting. The model also has 9 fewer false positives, meaning it incorrectly predicts fewer non-defaulters as defaulters.</p>
 <p>Figure 7(c) contradicts the other models (LR and RF), as these models predicted <em>LoanPercentIncome</em> to have less of an impact on the predictions than the XGBoost model. However, similar to the RF and LR model, the XGBoost placed high importance on <em>PersonHomeOwnership</em> reinforcing the notion that the proportion of income allocated to a loan significantly impacts the risk of defaulting. However, <em>LoanGrade</em> ranks higher than in the RF and LR, indicating that home ownership status may play a larger role in how XGBoosts evaluates credit risk.</p>
 </div>
 </div>
@@ -539,16 +539,16 @@ Figure&nbsp;8: Model Evaluation and Comparisons
 </div>
 </div>
 </div>
-<p>Figure 8(a) shows that XGBoost (0.928) achieves the highest accuracy, closely followed by Random Forest (0.923), while Logistic Regression lags (0.753). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimizing the cost of misclassifying defaulters is critical (Hand &amp; Henley, 1997)</p>
-<p>Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (0.944), strong sensitivity (0.717), and F1 score (0.814). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (0.787) however, precision (0.466) is lacking reducing the applications of this model. Also LR has, the highest log loss (8.886), suggesting poorer probability calibration.</p>
-<p>In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm (Hand &amp; Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.</p>
-<p>Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritize features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively <span class="citation" data-cites="Zhou:2002">(<a href="#ref-Zhou:2002" role="doc-biblioref">Zhou et al., 2002</a>)</span>, making them more suited to complex credit risk tasks.</p>
+<p>Figure 8(a) shows that XGBoost (0.928) achieves the highest accuracy, closely followed by RF (0.923), while LR lags behind (0.755). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimising the cost of misclassifying defaulters is critical <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">(<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">Hand, D. J., &amp; Henley, W. E., 1997</a>)</span>.</p>
+<p>Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (0.943), strong sensitivity (0.718), and F1 score (0.815). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (0.787) however, precision (0.467) is lacking reducing the applications of this model. Also, LR has the highest log loss (8.841), suggesting poorer probability calibration.</p>
+<p>In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm <span class="citation" data-cites="Hand_D_J_Henley_W_E:1997">(<a href="#ref-Hand_D_J_Henley_W_E:1997" role="doc-biblioref">Hand, D. J., &amp; Henley, W. E., 1997</a>)</span>. While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.</p>
+<p>Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritise features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively <span class="citation" data-cites="Zhou:2002">(<a href="#ref-Zhou:2002" role="doc-biblioref">Zhou et al., 2002</a>)</span>, making them more suited to complex credit risk tasks.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
 <section id="who-gets-a-fair-deal-auditing-xgboosts-default-predictions" class="level3">
 <h3 class="anchored" data-anchor-id="who-gets-a-fair-deal-auditing-xgboosts-default-predictions"><strong>3.3 Who Gets a Fair Deal? Auditing XGBoost’s Default Predictions</strong></h3>
 <div class="cell" data-execution_count="22">
-<div class="cell-output cell-output-display" data-execution_count="88">
+<div class="cell-output cell-output-display" data-execution_count="44">
 <table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <caption>Table 3: Fairness Audit</caption>
 <thead>
@@ -562,33 +562,33 @@ Figure&nbsp;8: Model Evaluation and Comparisons
 <tbody>
 <tr class="odd">
 <td>Low Income</td>
-<td>0.913</td>
-<td>0.765</td>
-<td>0.845</td>
+<td>0.916</td>
+<td>0.768</td>
+<td>0.850</td>
 </tr>
 <tr class="even">
 <td>High Income</td>
-<td>0.943</td>
-<td>0.605</td>
-<td>0.737</td>
+<td>0.940</td>
+<td>0.602</td>
+<td>0.728</td>
 </tr>
 <tr class="odd">
 <td>Young (&lt; median age)</td>
-<td>0.928</td>
-<td>0.741</td>
-<td>0.831</td>
+<td>0.927</td>
+<td>0.735</td>
+<td>0.828</td>
 </tr>
 <tr class="even">
 <td>Old (≥ median age)</td>
-<td>0.928</td>
-<td>0.693</td>
-<td>0.798</td>
+<td>0.929</td>
+<td>0.701</td>
+<td>0.802</td>
 </tr>
 <tr class="odd">
 <td>Renters</td>
 <td>0.929</td>
-<td>0.812</td>
-<td>0.878</td>
+<td>0.811</td>
+<td>0.877</td>
 </tr>
 <tr class="even">
 <td>Homeowners</td>
@@ -598,30 +598,30 @@ Figure&nbsp;8: Model Evaluation and Comparisons
 </tr>
 <tr class="odd">
 <td>Mortgage</td>
-<td>0.914</td>
-<td>0.420</td>
-<td>0.566</td>
+<td>0.916</td>
+<td>0.429</td>
+<td>0.575</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>The fairness audit of the XGBoost model highlights clear differences in recall across borrower subgroups. While overall accuracy remains high, recall is substantially lower for high-income (0.605) and mortgage (0.42) groups, suggesting the model is less effective at flagging defaulters in these categories. In contrast, renters (0.812) and homeowners (0.839) benefit from stronger sensitivity. These gaps may reflect imbalanced data or overlapping traits that obscure risk signals. For instance, mortgagers may combine stable income with high debt, complicating predictions. High-income defaulters may also be underrepresented, reducing model focus. Addressing these differences through subgroup-aware tuning or fairness constraints can improve equity in credit assessments.</p>
+<p>The fairness audit of the XGBoost model highlights clear differences in recall across borrower subgroups. While overall accuracy remains high, recall is substantially lower for high-income (0.602) and mortgage (0.429) groups, suggesting the model is less effective at flagging defaulters in these categories. In contrast, renters (0.811) and homeowners (0.839) benefit from stronger sensitivity. These gaps may reflect imbalanced data or overlapping traits that obscure risk signals. For instance, mortgagers may combine stable income with high debt, complicating predictions. High-income defaulters may also be underrepresented, reducing model focus. Addressing these differences through subgroup-aware tuning or fairness constraints can improve equity in credit assessments.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
 <section id="from-models-to-meaning-what-we-can-learn" class="level3">
 <h3 class="anchored" data-anchor-id="from-models-to-meaning-what-we-can-learn"><strong>3.4 From Models to Meaning: What We Can Learn</strong></h3>
-<p>This project showed that ensemble learning models like XGBoost and Random Forest can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better <span class="citation" data-cites="Chopra:2018">(<a href="#ref-Chopra:2018" role="doc-biblioref">Chopra &amp; Bhilare, 2018</a>)</span>. Features such as <em>LoanGrade</em>, <em>LoanPercentIncome</em>, and <em>PersonIncome</em> emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.</p>
+<p>This project showed that ensemble learning models like XGBoost and RF can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better <span class="citation" data-cites="Chopra:2018">(<a href="#ref-Chopra:2018" role="doc-biblioref">Chopra &amp; Bhilare, 2018</a>)</span>. Features such as <em>LoanGrade</em>, <em>LoanPercentIncome</em>, and <em>PersonIncome</em> emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.</p>
 <p>However, there are trade-offs. These models are harder to interpret, which can be a challenge in regulated sectors where transparency is important <span class="citation" data-cites="Rudin:2019">(<a href="#ref-Rudin:2019" role="doc-biblioref">Rudin, 2019</a>)</span>. They also demand more computational power, which might limit access for smaller institutions <span class="citation" data-cites="Lei:2025">(<a href="#ref-Lei:2025" role="doc-biblioref">Lei, 2025</a>)</span>. Without proper tuning, they can overfit on skewed data <span class="citation" data-cites="Cheng:2021">(<a href="#ref-Cheng:2021" role="doc-biblioref">Cheng et al., 2021</a>)</span>. There’s also the risk of reinforcing biases present in the training data, potentially leading to unfair outcomes in lending <span class="citation" data-cites="Shah:2025">(<a href="#ref-Shah:2025" role="doc-biblioref">Shah &amp; Davis, 2025</a>)</span>. Moving forward, improving explainability, tuning, and fairness will be essential for making these models more practical and trustworthy.</p>
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 </section>
 </section>
 <section id="key-takeaways" class="level2">
 <h2 class="anchored" data-anchor-id="key-takeaways"><strong>4. Key Takeaways</strong></h2>
-<p>This project compared the performance of Logistic Regression, Random Forest, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (0.928), AUC (0.944), and F1-score (0.814), showing its strength in capturing complex, non-linear patterns in borrower behavior. Random Forest also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. Logistic Regression trailed behind, limited by its simpler, linear structure.</p>
+<p>This project compared the performance of LR, RF, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (0.928), AUC (0.943), and F1-score (0.815), showing its strength in capturing complex, non-linear patterns in borrower behavior. RF also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. LR trailed behind, limited by its simpler, linear structure.</p>
 <p>When looking at what each model focused on, LR leaned heavily on income-based features like PersonIncome and LoanPercentIncome. In contrast, RF and XGBoost picked up broader signals, giving more weight to LoanGrade and PersonHomeOwnership. This suggests that ensemble models offer a more rounded view of credit risk.</p>
-<p>To explore how default risk changes across different borrowers, a causal forest was used to estimate Conditional Average Treatment Effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.</p>
-<p>Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot</p>
+<p>To explore how default risk changes across different borrowers, a causal forest was used to estimate conditional average treatment effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.</p>
+<p>Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot.</p>
 <!-- Back to Top Button -->
 <button onclick="topFunction()" id="backToTopBtn" title="Go to top">
 ↑ Top

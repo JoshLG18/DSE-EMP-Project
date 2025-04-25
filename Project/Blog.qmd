@@ -81,9 +81,9 @@ plt.rcParams.update({
 
 ## **1. Why Predicting Defaults Matters More Than Ever**
 
-Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these kinds of predictions [@Yang:2024].
+Access to credit plays a big role in helping people grow businesses, buy property, or manage unexpected costs. But from the lender’s side, it comes with risk. If a borrower defaults, it can lead to major losses. That’s why being able to accurately predict who’s likely to default is so important. Traditional credit scoring has been the standard, but more recently, machine learning (ML) has shown it can do a better job at making these types of predictions [@Yang:2024].
 
-This project uses real-world loan data to compare the performance of three models: Logistic Regression (LR), Random Forest (RF), and XGBoost. Each model is tested using accuracy, precision, recall, F1-score, and AUC (Area under the curve). These metrics help assess how well the models identify defaulters and how reliable their predictions are overall [@Saito:2015].
+This project uses real-world loan data to compare the performance of three models: Logistic Regression (LR), Random Forest (RF), and XGBoost. Each model is tested using accuracy, precision, recall, F1-score, and area under the curve (AUC). These metrics help assess how well the models identify defaulters and how reliable their predictions are overall [@Saito:2015].
 
 The project also looks at fairness across different borrower groups to see if the models are biased towards or against certain types of applicants. Combining ML with causal analysis, it aims to give a deeper, more balanced view of credit risk prediction.
 
@@ -209,8 +209,7 @@ cat_rows = pd.DataFrame({
 summary_stats = pd.concat([summary_stats, cat_rows], ignore_index=True)
 ```
 
-### **2.1 Preparing the Data and Descriptive Statistics**
-
+### **2.1 Getting to Know the Data: Patterns, Quality, and First Impressions**
 
 ::: {.panel-tabset}
 
@@ -233,7 +232,7 @@ Table 1 and 2 display missing values and summary statistics for all variables. O
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
-### **2.2 Distribution Analysis**
+### **2.2 How the Data Behaves: Exploring Distributions**
 
 ```{python}
 #| fig-align: "center"
@@ -308,12 +307,12 @@ fig, axes = plt.subplots(3, 1, figsize=(8, 8))
 
 # Boxplot before normalisation
 loan_data_pre.boxplot(ax=axes[0])
-axes[0].set_title("(a): Box Plots of ALL Variables Before Normalisation", fontsize=10)
+axes[0].set_title("(a): Box Plots of all Variables Before Normalisation", fontsize=10)
 axes[0].tick_params(axis='x', labelrotation=45)
 
 # Boxplot after normalisation
 loan_data.boxplot(ax=axes[1])
-axes[1].set_title("(b): Box Plots of ALL Variables After Normalisation", fontsize=10)
+axes[1].set_title("(b): Box Plots of all Variables After Normalisation", fontsize=10)
 axes[1].tick_params(axis='x', labelrotation=45)
 
 # Class imbalance plot (no downsampling)
@@ -329,13 +328,13 @@ plt.show()
 
 ```
 
-Figure 2(a) shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed, normalised data is shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
+Figure 2(a) shows that the data isn't scaled proportionally, therefore we need to apply a scaling technique. Due to the skewness of all the variables quantile transformation was deployed with normalised data shown in Figure 2 (b). The plot shows outliers, however there is no reason for these to be errors meaning they will not be removed. For example, the reason for outliers in *PersonIncome* is due to people earning considerably more than average.
 
 Figure 2(c) demonstrates the distribution of *LoanStatus* within the dataset. This can cause large impacts on the ML models deployed in the analysis, leading to skewed performance metrics as the models will predict the majority class with high accuracy but the minority class with lower accuracy. To circumvent this issue, I implemented class weighting within my ML models.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
-### **2.3 Correlation and Multicollinearity Analysis**
+### **2.3 Detecting Relationships and Multicollinearity Among Variables**
 
 ```{python}
 plt.rcParams.update({'font.size': 10})
@@ -396,15 +395,15 @@ LG_vs_LIR = corr_matrix.loc["LoanIntRate", "LoanGrade"].round(2)
 PA_vs_CH = corr_matrix.loc["CredHistory", "PersonAge"].round(2)
 ```
 
-Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (r = `{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While such correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.
+Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (r = `{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While these correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.
 
 VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, and *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which indicates multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
-### **2.4 Causal Analysis**
+### **2.4 Moving Beyond Correlation: Searching for Causality**
 
-This section explores the heterogeneous impact of *PreviousDefault* on the likelihood of defaulting again, using a causal forest framework. *PreviousDefault* was used within this analysis as @Hand_D_J_Henley_W_E:1997 observed past defaulting status has a strong association with future loan defaults. By estimating Conditional Average Treatment Effects (CATEs), we can observe how the effect of previous default varies across individual borrower profiles.
+This section explores the heterogeneous impact of *PreviousDefault* on the likelihood of defaulting again, using a causal forest framework. *PreviousDefault* was used within this analysis as @Hand_D_J_Henley_W_E:1997 observed past defaulting status has a strong association with future loan defaults. By estimating conditional average treatment effects (CATEs), we can observe how the effect of previous default varies across individual borrower profiles.
 
 ```{python}
 #| label: fig-causal_a
@@ -448,7 +447,7 @@ plt.ylabel('Frequency')
 plt.show()
 ```
 
-Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centred near zero. This suggests that, for the majority of borrowers, previous default status has a marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behaviour. The long right tail emphasizes the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.
+Figure 4 shows estimated CATEs, revealing a negatively-skewed distribution with most values centred near zero. This suggests that, for the majority of borrowers, previous default status has a marginal effect on the likelihood of defaulting again. However, a distinct subgroup exhibits significantly higher CATEs, indicating a substantially increased default risk following a previous default. These individuals may represent vulnerable borrowers, for whom financial distress is a strong predictor of future behaviour. The long right tail emphasises the importance of heterogeneity in treatment effects and justifies the use of a causal forest over average-effect models.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
@@ -476,7 +475,7 @@ param_grid = {
     'solver': ['liblinear']
 }
 
-# Initialize Grid Search with Cross-Validation for Logistic Regression
+# Initialise Grid Search with Cross-Validation for Logistic Regression
 stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 grid_search = GridSearchCV(
     LogisticRegression(class_weight='balanced', random_state=42),
@@ -520,7 +519,7 @@ auc_value_LR = round(auc(fpr_lr, tpr_lr), 3)
 
 ```{python}
 #| label: fig-LR-Vis
-#| fig-cap: "Logistic Regression Model Visualizations"
+#| fig-cap: "Logistic Regression Model Visualisations"
 
 # --- Fit statsmodels logit for odds ratios ---
 X_train_sm = sm.add_constant(X_train)
@@ -598,7 +597,7 @@ Figure 5(a) shows the ROC curve for the LR model, an indication of the trade-off
 
 Figure 5(b) visualises the error within the classification model. The matrix reveals that the model correctly identified `{python} str(TN)` non-default cases (true negatives) and `{python} str(TP)` default cases (true positives), demonstrating its ability to capture both classes effectively. However, `{python} str(FP)` non-default cases were misclassified as defaults (false positives), while `{python} str(FN)` defaulters were missed (false negatives), which could result in financial loss for lenders.
 
-Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)`, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, indicates that higher income lowers default probability, consistent with economic expectations.
+Figure 5(c) shows the odds ratios for the LR model. The odds ratio indicates the increase in the risk of defaulting for a one-unit increase in that variable and allows for an easy interpretation of the relationships between the individual features and credit risk. The results indicate that *`{python} str(Feature_1)`* and *`{python} str(Feature_2)`* have the strongest positive associations with default, with odds ratios of `{python} str(odds_Feature_1)` and `{python} str(odds_Feature_2)`, respectively. This suggests that as interest rates or the proportion of income allocated to the loan increases, the likelihood of default rises significantly. Conversely, *`{python} str(Feature_3)`* has an odds ratio of `{python} str(odds_Feature_3)`, indicating that higher income lowers default probability, consistent with economic expectations.
 
 
 ### **3.1.2 Random Forest**
@@ -618,12 +617,12 @@ param_grid = {
 # Define Stratified K-Fold
 stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
-# Initialize Grid Search with Cross-Validation
+# Initialise Grid Search with Cross-Validation
 grid_search = GridSearchCV(
     RandomForestClassifier(class_weight='balanced', random_state=42),
     param_grid,
     cv=stratified_kfold,
-    scoring='f1',     # Focused on minimizing false negatives
+    scoring='f1',     # Focused on minimising false negatives
     verbose=0,
     n_jobs=-1
 )
@@ -658,7 +657,7 @@ auc_value_RF = round(auc(fpr_rf, tpr_rf), 3)
 
 ```{python}
 #| label: fig-RF-Vis
-#| fig-cap: "Random Forest Model Visualizations"
+#| fig-cap: "Random Forest Model Visualisations"
 
 # --- Random Forest: Feature Importances ---
 feature_importances = best_rf_model.feature_importances_
@@ -750,7 +749,7 @@ param_grid = {
     'scale_pos_weight': [scale_pos_weight],  # 👈 Add this
 }
 
-# Initialize Grid Search with f1 scoring
+# Initialise Grid Search with f1 scoring
 grid_search = GridSearchCV(
     XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='aucpr'),
     param_grid,
@@ -789,7 +788,7 @@ auc_value_XGB = round(auc(fpr_xgb, tpr_xgb), 3)
 
 ```{python}
 #| label: fig-XGB-Vis
-#| fig-cap: "XGBoost Model Visualizations"
+#| fig-cap: "XGBoost Model Visualisations"
 
 # --- XGBoost: Feature Importances ---
 feature_importances_xgb = best_xgb_model.feature_importances_
@@ -948,13 +947,13 @@ plt.subplots_adjust(hspace=0.4)
 plt.show()
 ```
 
-Figure 8(a) shows that XGBoost (`{python} str(accuracyXGB)`) achieves the highest accuracy, closely followed by Random Forest (`{python} str(accuracyRF)`), while Logistic Regression lags (`{python} str(accuracyLR)`). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimizing the cost of misclassifying defaulters is critical (Hand & Henley, 1997)
+Figure 8(a) shows that XGBoost (`{python} str(accuracyXGB)`) achieves the highest accuracy, closely followed by RF (`{python} str(accuracyRF)`), while LR lags behind (`{python} str(accuracyLR)`). However, accuracy alone can be misleading in imbalanced classification tasks such as credit scoring, where minimising the cost of misclassifying defaulters is critical [@Hand_D_J_Henley_W_E:1997].
 
-Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the applications of this model. Also LR has, the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration.
+Figure 8(b) highlights XGBoost’s overall strength, with the highest AUC (`{python} str(auc_value_XGB)`), strong sensitivity (`{python} str(recallXGB)`), and F1 score (`{python} str(f1_scoreXGB)`). RF performs similarly, though with slightly lower recall. LR underperforms across most metrics except sensitivity (`{python} str (recallLR)`) however, precision (`{python} str (precisionLR)`) is lacking reducing the applications of this model. Also, LR has the highest log loss (`{python} str(log_loss_LR)`), suggesting poorer probability calibration.
 
-In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm (Hand & Henley, 1997). While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
+In credit risk analysis, recall is critical. Missing a default is costlier than a false alarm [@Hand_D_J_Henley_W_E:1997]. While LR has competitive recall, XGBoost offers a better balance between recall, precision, and overall performance.
 
-Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritize features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively [@Zhou:2002], making them more suited to complex credit risk tasks.
+Table 8(c) shows LR focuses on income-related variables, suggesting linear assumptions. Tree-based models prioritise features like LoanGrade and HomeOwnership, capturing non-linear interactions more effectively [@Zhou:2002], making them more suited to complex credit risk tasks.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
@@ -1032,7 +1031,7 @@ The fairness audit of the XGBoost model highlights clear differences in recall a
 
 ### **3.4 From Models to Meaning: What We Can Learn**
 
-This project showed that ensemble learning models like XGBoost and Random Forest can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better [@Chopra:2018]. Features such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome* emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.
+This project showed that ensemble learning models like XGBoost and RF can significantly improve how we assess credit risk. Unlike traditional approaches, these models pick up on complex, non-linear relationships in financial data and handle imbalanced datasets much better [@Chopra:2018]. Features such as *LoanGrade*, *LoanPercentIncome*, and *PersonIncome* emerged as key predictors, helping lenders make more accurate decisions, reduce misclassifications, and ultimately lower default rates.
 
 However, there are trade-offs. These models are harder to interpret, which can be a challenge in regulated sectors where transparency is important [@Rudin:2019]. They also demand more computational power, which might limit access for smaller institutions [@Lei:2025]. Without proper tuning, they can overfit on skewed data [@Cheng:2021]. There's also the risk of reinforcing biases present in the training data, potentially leading to unfair outcomes in lending [@Shah:2025]. Moving forward, improving explainability, tuning, and fairness will be essential for making these models more practical and trustworthy.
 
@@ -1040,13 +1039,13 @@ However, there are trade-offs. These models are harder to interpret, which can b
 
 ## **4. Key Takeaways**
 
-This project compared the performance of Logistic Regression, Random Forest, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (`{python} str(accuracyXGB)`), AUC (`{python} str(auc_value_XGB)`), and F1-score (`{python} str(f1_scoreXGB)`), showing its strength in capturing complex, non-linear patterns in borrower behavior. Random Forest also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. Logistic Regression trailed behind, limited by its simpler, linear structure.
+This project compared the performance of LR, RF, and XGBoost in predicting loan defaults. XGBoost came out on top across all metrics, with the highest accuracy (`{python} str(accuracyXGB)`), AUC (`{python} str(auc_value_XGB)`), and F1-score (`{python} str(f1_scoreXGB)`), showing its strength in capturing complex, non-linear patterns in borrower behavior. RF also performed well, though its slightly lower sensitivity suggests it might miss a few more defaulters. LR trailed behind, limited by its simpler, linear structure.
 
 When looking at what each model focused on, LR leaned heavily on income-based features like PersonIncome and LoanPercentIncome. In contrast, RF and XGBoost picked up broader signals, giving more weight to LoanGrade and PersonHomeOwnership. This suggests that ensemble models offer a more rounded view of credit risk.
 
-To explore how default risk changes across different borrowers, a causal forest was used to estimate Conditional Average Treatment Effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.
+To explore how default risk changes across different borrowers, a causal forest was used to estimate conditional average treatment effects (CATEs) for PreviousDefault. While most estimates were close to zero, a clear subgroup showed much higher risk, highlighting the value of causal inference in spotting patterns that average models can miss.
 
-Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot
+Even the best models have their blind spots. A fairness audit revealed that XGBoost performed unevenly across borrower groups, flagging fewer defaults for some demographics. This reinforces why fairness checks should be built into credit decision systems, to make sure everyone gets a fair shot.
 
 <!-- Back to Top Button -->
 <button onclick="topFunction()" id="backToTopBtn" title="Go to top">↑ Top</button>
