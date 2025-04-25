@@ -1,3 +1,3 @@
 Link to Github = https://github.com/JoshLG18/DSE-EMP-Project
 
-Link to Blog Post = 
+Link to Blog Post = https://joshlg18.quarto.pub/predicting-loan-defaults-a-data-driven-approach-to-credit-risk-analysis
