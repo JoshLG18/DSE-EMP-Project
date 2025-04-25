@@ -55,6 +55,7 @@ from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 # ML Models
 from sklearn.linear_model import LogisticRegression, LinearRegression
@@ -92,6 +93,9 @@ The project also looks at fairness across different borrower groups to see if th
 ## **2. Exploring Risk: From Patterns to Causal Effects**
 
 ```{python}
+#Setting Seed
+np.random.seed(42)
+
 #Loading the data
 loan_data = pd.read_csv('Data/credit_risk_dataset.csv')
 nrows_pre = loan_data.shape[0]
@@ -352,8 +356,6 @@ y_test = test_data['LoanStatus']
 #| label: fig-Corr-Multi
 #| fig-cap: "Correlation and Multicollinearity Analysis"
 
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-
 # Compute correlation
 corr_matrix = loan_data.corr(method='spearman')
 
@@ -397,7 +399,7 @@ PA_vs_CH = corr_matrix.loc["CredHistory", "PersonAge"].round(2)
 
 Figure 3(a) shows a correlation plot quantifying the relationships between the variables and the target *LoanStatus*. *LoanGrade* and *LoanIntRate* have a high correlation coefficient (r = `{python} str(LG_vs_LIR)`), indicating that they are highly correlated. Also, a similar relationship is shown between *PersonAge* and *CredHistory* (r = `{python} str(PA_vs_CH)`). These patterns are expected, older borrowers tend to have longer credit histories, and higher loan grades are typically associated with higher interest rates. While these correlations suggest potential multicollinearity, further assessment using variance inflation factors (VIF) is required.
 
-VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, and *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, *LoanAmnt*, *LoanPercentIncome* and *PersonIncome* have VIF values greater than 10 which indicates multicollinearity and actions need to be taken to ensure they don't affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.
+VIF values for all the variables are shown in Figure 3(b). In contrast to Figure 3(a), *LoanGrade*, *LoanIntRate*, *PersonAge*, and *CredHistory* have low VIF values, indicating low levels of multicollinearity. However, LoanAmnt, LoanPercentIncome and PersonIncome have VIF values greater than 10 which indicates multicollinearity and actions need to be taken to ensure they don’t affect the models. For the logistic regression, L1 and L2 regularisation was deployed to reduce the effects of multicollinearity. Other models are tree-based and handle multicollinearity, therefore no further processing is needed.
 
 <hr style="width: 150px; border: none; height: 4px; background-color:rgb(45,62,81,255); margin: auto;">
 
@@ -466,8 +468,6 @@ Before training the models, the dataset was split into train and test sets using
 The first model deployed was an LR trained on all the standard variables, this model acts as a baseline to compare all more complex models with.
 
 ```{python}
-sys.stdout = open(os.devnull, 'w')
-
 # Define the parameter grid for Grid Search
 param_grid = {
     'C': [0.01, 0.1, 1, 10, 100],
@@ -1005,8 +1005,6 @@ fairness_results = pd.DataFrame([
     subgroup_metrics("Mortgage", mortgagers['y_true'], mortgagers['y_pred']),
 
 ])
-
-# Display in Quarto
 
 # Extract recall values for specific subgroups
 recall_low_income = fairness_results.loc[fairness_results['Group'] == "Low Income", 'Recall'].values[0]
